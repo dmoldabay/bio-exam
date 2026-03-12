@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBO 2026 — Bioinformatics Section</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --bg: #f7f8fa;
+            --surface: #ffffff;
+            --surface2: #f0f2f5;
+            --border: #d0d7de;
+            --border2: #e4e8ed;
+            --accent: #1a56a0;
+            --accent-light: #e8f0fb;
+            --accent2: #1a7a3c;
+            --accent2-light: #e6f4ec;
+            --accent3: #c0392b;
+            --accent3-light: #fdf0ef;
+            --accent4: #6b21a8;
+            --text: #1c2333;
+            --text2: #57606a;
+            --text3: #8c959f;
+            --timer-warn: #b45309;
+            --timer-danger: #c0392b;
+            --header-bg: #1a2a4a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── LOGIN ── */
+        #login-screen {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #1a2a4a 0%, #1e3a6e 60%, #163060 100%);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 44px 40px;
+            width: 440px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        }
+
+        .login-logo {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 28px; padding-bottom: 24px;
+            border-bottom: 2px solid var(--border2);
+        }
+
+        .login-logo .dna-icon {
+            width: 46px; height: 46px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+
+        .login-logo h1 {
+            font-size: 1rem; font-weight: 700; color: var(--text);
+            line-height: 1.3;
+        }
+
+        .login-logo p { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+
+        .field-label {
+            font-size: 0.73rem; font-weight: 700;
+            color: var(--text2); text-transform: uppercase;
+            letter-spacing: 0.07em; margin-bottom: 6px; margin-top: 18px;
+        }
+
+        .login-box input, .login-box select {
+            width: 100%; padding: 11px 13px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.93rem;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .login-box input:focus, .login-box select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(26,86,160,0.12);
+        }
+
+        #start-btn {
+            width: 100%; margin-top: 26px; padding: 13px;
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; transition: background 0.2s, transform 0.1s;
+            letter-spacing: 0.04em;
+        }
+
+        #start-btn:hover { background: #1648a0; transform: translateY(-1px); }
+
+        .exam-rules {
+            margin-top: 18px; padding: 12px 14px;
+            background: #fff8f0; border: 1px solid #f5cba7;
+            border-radius: 6px; font-size: 0.79rem; color: #7d5a1e; line-height: 1.6;
+        }
+
+        /* ── HEADER ── */
+        header {
+            height: 58px; flex-shrink: 0;
+            background: var(--header-bg);
+            padding: 0 22px;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .header-brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.88rem; font-weight: 700; color: #ffffff;
+            white-space: nowrap; letter-spacing: 0.02em;
+        }
+
+        .header-brand span { color: #7eb3f5; }
+
+        #timer-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem; font-weight: 700;
+            padding: 6px 16px; border-radius: 5px;
+            background: rgba(255,255,255,0.08);
+            color: #f9c74f;
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.5s;
+            min-width: 90px; text-align: center;
+        }
+
+        #timer-display.warn { color: #f4a261; background: rgba(244,162,97,0.15); border-color: rgba(244,162,97,0.3); }
+        #timer-display.ok   { color: #90e0b0; background: rgba(144,224,176,0.1);  border-color: rgba(144,224,176,0.25); }
+
+        #user-info {
+            font-size: 0.8rem; color: rgba(255,255,255,0.7);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem;
+        }
+
+        .btn-header {
+            padding: 7px 14px; border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.25);
+            font-family: 'DM Sans', sans-serif; font-size: 0.77rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            background: rgba(255,255,255,0.08); color: #fff;
+        }
+
+        .btn-header:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.4); }
+
+        .btn-submit {
+            background: #c0392b; border-color: #c0392b; color: #fff; font-weight: 700;
+        }
+
+        .btn-submit:hover { background: #a93226; border-color: #a93226; }
+
+        /* ── MAIN LAYOUT ── */
+        main {
+            display: flex; flex: 1;
+            height: calc(100vh - 58px);
+            overflow: hidden;
+        }
+
+        #scenario-panel {
+            width: 55%; display: flex; flex-direction: column;
+            border-right: 2px solid var(--border);
+        }
+
+        #workbench-panel {
+            width: 45%; display: flex; flex-direction: column;
+            padding: 14px; gap: 12px; overflow: hidden;
+            background: var(--bg);
+        }
+
+        /* ── TABS ── */
+        .tab-bar {
+            display: flex; gap: 2px; padding: 10px 14px 0;
+            background: var(--surface2);
+            border-bottom: 2px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            padding: 8px 16px; border: 1px solid transparent;
+            border-bottom: none; background: transparent;
+            color: var(--text2); cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600;
+            transition: all 0.15s;
+        }
+
+        .tab-btn:hover { color: var(--accent); background: rgba(26,86,160,0.05); }
+
+        .tab-btn.active {
+            background: var(--surface);
+            border-color: var(--border);
+            border-bottom-color: var(--surface);
+            color: var(--accent);
+            margin-bottom: -2px;
+            font-weight: 700;
+        }
+
+        /* ── CONTENT ── */
+        #scenario-content {
+            flex: 1; overflow-y: auto;
+            padding: 26px 30px;
+            background: var(--surface);
+            line-height: 1.7;
+        }
+
+        #scenario-content h2 {
+            font-size: 1.05rem; font-weight: 800;
+            color: var(--accent); margin-bottom: 6px;
+            padding-bottom: 10px; border-bottom: 2px solid var(--border2);
+        }
+
+        #scenario-content h3 {
+            font-size: 0.78rem; font-weight: 800;
+            color: var(--text3); margin: 22px 0 10px;
+            text-transform: uppercase; letter-spacing: 0.07em;
+        }
+
+        #scenario-content p {
+            font-size: 0.89rem; color: var(--text2); margin: 12px 0 8px;
+        }
+
+        .task-header {
+            display: flex; align-items: center; gap: 10px;
+            margin: 22px 0 12px; padding: 11px 15px;
+            background: var(--accent-light);
+            border: 1px solid #bfd4f0;
+            border-radius: 7px; border-left: 4px solid var(--accent);
+        }
+
+        .task-num {
+            background: var(--accent); color: #fff;
+            font-size: 0.68rem; font-weight: 800;
+            padding: 3px 8px; border-radius: 4px;
+            letter-spacing: 0.06em; white-space: nowrap;
+        }
+
+        .task-header p { margin: 0; font-size: 0.87rem; color: var(--text); font-weight: 600; }
+
+        /* ── INPUTS ── */
+        .mc-option {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 11px 14px; margin: 5px 0;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 7px; cursor: pointer; transition: all 0.15s;
+            font-size: 0.87rem; color: var(--text);
+        }
+
+        .mc-option:hover { border-color: var(--accent); background: var(--accent-light); }
+        .mc-option input { margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; }
+
+        .answer-input {
+            width: 100%; padding: 9px 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s; margin: 5px 0;
+        }
+
+        .answer-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(26,86,160,0.1);
+        }
+
+        textarea.answer-input { resize: vertical; min-height: 70px; }
+
+        .formula-box {
+            background: #fffdf0;
+            border: 1px solid #e8d87a;
+            border-radius: 7px; padding: 14px;
+            text-align: center; margin: 14px 0;
+            font-size: 0.9rem; color: var(--text);
+        }
+
+        .dataset-box {
+            background: #1e2a3a;
+            border: 1px solid #344563;
+            border-left: 4px solid #3a8c5c;
+            border-radius: 7px; padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.71rem; color: #a8e6c4;
+            white-space: pre-wrap; margin: 10px 0;
+            max-height: 220px; overflow-y: auto;
+            line-height: 1.65;
+        }
+
+        .dataset-box .seq-header { color: #7eb3f5; font-weight: 700; }
+
+        table {
+            width: 100%; border-collapse: collapse; margin: 10px 0;
+            font-size: 0.85rem; border: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--surface2); color: var(--text2);
+            padding: 9px 12px; text-align: left;
+            border: 1px solid var(--border); font-weight: 700;
+            font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 8px 11px; border: 1px solid var(--border);
+            color: var(--text); vertical-align: middle; background: var(--surface);
+        }
+
+        tr:nth-child(even) td { background: #fafbfc; }
+
+        td input, td select {
+            width: 100%; padding: 5px 8px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 4px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.82rem; outline: none;
+        }
+
+        td input:focus, td select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(26,86,160,0.1);
+        }
+
+        .select-input {
+            width: 100%; padding: 9px 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+            outline: none; margin: 5px 0; cursor: pointer;
+        }
+
+        /* ── WORKBENCH ── */
+        .tool-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .tool-card h3 {
+            font-size: 0.73rem; font-weight: 800; color: var(--text2);
+            text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
+        }
+
+        #seq-input {
+            width: 100%; height: 108px;
+            background: #1e2a3a; border: 1px solid #344563;
+            border-radius: 6px; color: #a8e6c4;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.71rem;
+            padding: 10px; resize: none; outline: none;
+        }
+
+        #seq-input:focus { border-color: #3a8c5c; }
+        #seq-input::placeholder { color: #6b7a8d; font-family: 'DM Sans', sans-serif; font-size: 0.79rem; }
+
+        .button-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px;
+        }
+
+        .btn-tool {
+            padding: 8px 8px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 5px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.77rem; font-weight: 600;
+            cursor: pointer; transition: all 0.15s;
+        }
+
+        .btn-tool:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .btn-tool.green:hover { border-color: var(--accent2); color: var(--accent2); background: var(--accent2-light); }
+        .btn-tool.wide {
+            grid-column: span 2;
+            background: var(--accent-light); border-color: #bfd4f0; color: var(--accent);
+        }
+        .btn-tool.wide:hover { background: #d4e6f8; border-color: var(--accent); }
+
+        .output-container { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+        #result-display {
+            flex: 1; overflow-y: auto;
+            background: #1e2a3a; border: 1px solid #344563;
+            border-radius: 7px; padding: 14px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.74rem;
+            color: #a8e6c4; line-height: 1.75;
+            white-space: pre-wrap;
+        }
+
+        .result-label {
+            font-size: 0.69rem; font-weight: 800; color: var(--text3);
+            text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+        /* Info box */
+        .info-box {
+            background: var(--accent-light);
+            border: 1px solid #bfd4f0;
+            border-radius: 7px; padding: 13px 15px;
+            font-size: 0.83rem; color: var(--text2); margin: 12px 0;
+            line-height: 1.65;
+        }
+
+        .info-box strong { color: var(--text); }
+
+        /* Ranking inputs */
+        .rank-row {
+            display: flex; align-items: center; gap: 10px; margin: 6px 0;
+        }
+
+        .rank-row label { font-size: 0.85rem; color: var(--text); min-width: 120px; }
+
+        .rank-row input {
+            width: 80px; padding: 6px 10px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 5px; color: var(--text);
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+            outline: none; text-align: center;
+        }
+
+        .pedigree-legend {
+            display: flex; flex-wrap: wrap; gap: 14px;
+            margin: 10px 0; padding: 11px 14px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 7px; font-size: 0.79rem; color: var(--text2);
+        }
+
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-sym {
+            width: 17px; height: 17px;
+            border: 2px solid var(--text2); display: inline-block;
+        }
+        .legend-sym.circle { border-radius: 50%; }
+        .legend-sym.filled { background: var(--text); border-color: var(--text); }
+
+        .section-divider {
+            border: none; border-top: 1px solid var(--border2); margin: 20px 0;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 2px 8px; border-radius: 12px;
+            font-size: 0.71rem; font-weight: 700; margin-left: 6px;
+        }
+
+        .tag-pill.blue  { background: var(--accent-light); color: var(--accent); }
+        .tag-pill.green { background: var(--accent2-light); color: var(--accent2); }
+        .tag-pill.red   { background: var(--accent3-light); color: var(--accent3); }
+    </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+    <div class="login-box">
+        <div class="login-logo">
+            <div class="dna-icon">🧬</div>
+            <div>
+                <h1>NBO 2026 — Bioinformatics</h1>
+                <p>National Biology Olympiad · Exam Portal</p>
+            </div>
+        </div>
+
+        <div class="field-label">Full Name</div>
+        <input type="text" id="student-name" placeholder="Enter your full name" autocomplete="off">
+
+        <div class="field-label">Region</div>
+        <select id="student-region">
+            <option value="">— Select Region —</option>
+        </select>
+
+        <div class="field-label">School Name</div>
+        <input type="text" id="student-school" placeholder="Enter school name" autocomplete="off">
+
+        <button id="start-btn" onclick="startExam()">BEGIN EXAM →</button>
+
+        <div class="exam-rules">
+            ⚠️ This exam is proctored and your activity is monitored. You have <strong>90 minutes</strong>. Once you submit, you cannot retake the exam.
+        </div>
+    </div>
+</div>
+
+<!-- ── EXAM INTERFACE ── -->
+<div id="exam-interface" class="hidden">
+    <header>
+        <div class="header-brand">
+            🧬 <span>NBO 2026</span> · Bioinformatics
+        </div>
+        <div id="timer-display">90:00</div>
+        <div id="user-info">
+            <span class="user-badge" id="display-name">—</span>
+            <span class="user-badge" id="display-region">—</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button class="btn-header" onclick="downloadAnswers()">⬇ Backup</button>
+            <button class="btn-header btn-submit" onclick="finalSubmit()">SUBMIT EXAM</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- LEFT: Questions -->
+        <section id="scenario-panel">
+            <div class="tab-bar">
+                <button class="tab-btn" onclick="showScenario(1)">Q1 · Viral Outbreak</button>
+                <button class="tab-btn" onclick="showScenario(2)">Q2 · Ancient Plants</button>
+                <button class="tab-btn" onclick="showScenario(3)">Q3 · Transposons</button>
+                <button class="tab-btn" onclick="showScenario(4)">Q4 · BRCA1 / Pedigree</button>
+            </div>
+            <div id="scenario-content"></div>
+        </section>
+
+        <!-- RIGHT: Workbench -->
+        <section id="workbench-panel">
+            <div class="tool-card">
+                <h3>⚗ Bio-Workbench</h3>
+                <textarea id="seq-input" placeholder="Paste DNA / mRNA / Protein sequences here (FASTA format)..."></textarea>
+                <div class="button-grid">
+                    <button class="btn-tool green" onclick="runTranscription()">DNA → mRNA</button>
+                    <button class="btn-tool green" onclick="runTranslation()">mRNA → Protein</button>
+                    <button class="btn-tool" onclick="runSimpleAlignment()">Align (% Identity)</button>
+                    <button class="btn-tool purple" onclick="runPhyloTree()">Build Distance Matrix</button>
+                    <button class="btn-tool wide" onclick="runDomainAnalysis()">🔬 Domain Analysis via EBI InterPro API</button>
+                </div>
+            </div>
+            <div class="result-label">Output</div>
+            <div class="output-container">
+                <pre id="result-display">Analysis output will appear here...</pre>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLiIkAPZPmC2tR34rHbrFws0ZMY_iP49Y-3MIfzBn4F2nzWuUBzuciRlEQVjU3_IknQg/exec";
+const EBI_EMAIL = "moldabaydamir@gmail.com";
+const EXAM_MINS = 90;
+
+let examData = {};
+let timerInterval = null;
+
+const regions = ["Abai","Akmola","Aktobe","Almaty","Atyrau","East Kazakhstan","Jetisu","Karaganda","Kostanay","Kyzylorda","Mangystau","North Kazakhstan","Pavlodar","Turkistan","Ulytau","West Kazakhstan","Zhambyl"];
+
+function saveAns(k, v) { examData[k] = v; }
+function saveCheck(k, v) {
+    if (!examData[k]) examData[k] = [];
+    let i = examData[k].indexOf(v);
+    if (i > -1) examData[k].splice(i, 1); else examData[k].push(v);
+}
+
+/* ════════════════════════════════════════════════
+   SCENARIO CONTENT
+════════════════════════════════════════════════ */
+function showScenario(num) {
+    const content = document.getElementById('scenario-content');
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i+1) === num));
+
+    if (num === 1) content.innerHTML = `
+<h2>Question 1 — Viral Protease Outbreak in Laplandia</h2>
+<div class="info-box">
+A novel viral disease has spread across towns in Laplandia. Researchers from <strong>Highgarden</strong> isolated the virus and developed an antiviral drug targeting the viral <strong>protease</strong> enzyme. You must evaluate if this drug works against strains from other towns.
+</div>
+
+<div class="task-header">
+  <span class="task-num">TASK 1</span>
+  <p>DNA/RNA Sequence Alignment — which strains are curable? (threshold: &gt;90% similarity)</p>
+</div>
+<p style="font-size:0.8rem;color:var(--text2)">Use the Workbench tools on the right. Copy each town's sequence with the Highgarden reference and run <strong>Align (%)</strong>. Select all that apply:</p>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Winterfell')"> A. Winterfell</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Dorne')"> B. Dorne</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Gulltown')"> C. Gulltown</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Braavos')"> D. Braavos</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Volantis')"> E. Volantis</label>
+
+<div class="task-header">
+  <span class="task-num">TASK 2</span>
+  <p>Translation &amp; Protein Domain Identification — which strains are curable based on protein data?</p>
+</div>
+<p style="font-size:0.8rem;color:var(--text2)">Translate each mRNA sequence. Use Domain Analysis to verify the drug only targets a <strong>Protease</strong> domain. Select all curable strains:</p>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Winterfell')"> A. Winterfell</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Dorne')"> B. Dorne</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Gulltown')"> C. Gulltown</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Braavos')"> D. Braavos</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Volantis')"> E. Volantis</label>
+
+<p style="margin-top:16px;"><strong>Indicate the mutation type present in each strain:</strong></p>
+<table>
+  <tr><th>Strain</th><th>Type of Mutation</th></tr>
+  <tr><td>Winterfell</td><td><select onchange="saveAns('q1_mut_winterfell',this.value)"><option value="">— Select —</option><option>Missense</option><option>Nonsense</option><option>Silent (Synonymous)</option><option>Different gene</option></select></td></tr>
+  <tr><td>Dorne</td><td><select onchange="saveAns('q1_mut_dorne',this.value)"><option value="">— Select —</option><option>Missense</option><option>Nonsense</option><option>Silent (Synonymous)</option><option>Different gene</option></select></td></tr>
+  <tr><td>Gulltown</td><td><select onchange="saveAns('q1_mut_gulltown',this.value)"><option value="">— Select —</option><option>Missense</option><option>Nonsense</option><option>Silent (Synonymous)</option><option>Different gene</option></select></td></tr>
+  <tr><td>Braavos</td><td><select onchange="saveAns('q1_mut_braavos',this.value)"><option value="">— Select —</option><option>Missense</option><option>Nonsense</option><option>Silent (Synonymous)</option><option>Different gene</option></select></td></tr>
+  <tr><td>Volantis</td><td><select onchange="saveAns('q1_mut_volantis',this.value)"><option value="">— Select —</option><option>Missense</option><option>Nonsense</option><option>Silent (Synonymous)</option><option>Different gene</option></select></td></tr>
+</table>
+
+<div class="task-header">
+  <span class="task-num">TASK 3</span>
+  <p>Viral Virulence Analysis — rank each strain and prioritize cure allocation</p>
+</div>
+<div class="formula-box">
+  \\[ R = \\frac{\\ln(N_t) - \\ln(N_0)}{t} \\]
+  <div style="font-size:0.78rem;color:var(--text2);margin-top:6px;">R = virulence metric &nbsp;|&nbsp; N<sub>t</sub> = cases at time T &nbsp;|&nbsp; N<sub>0</sub> = initial cases &nbsp;|&nbsp; t = time (days)</div>
+</div>
+
+<div class="info-box" style="font-size:0.8rem;">
+  <strong>Epidemiological data (day 0 → day 15):</strong><br><br>
+  <table>
+    <tr><th>Strain</th><th>Population</th><th>Day 0</th><th>Day 15</th></tr>
+    <tr><td>Winterfell</td><td>6,830,530</td><td>125,650</td><td>890</td></tr>
+    <tr><td>Highgarden</td><td>25,000</td><td>5,600</td><td>12,350</td></tr>
+    <tr><td>Dorne</td><td>3,500,000</td><td>8,654</td><td>157,572</td></tr>
+    <tr><td>Gulltown</td><td>43,680</td><td>103</td><td>10,564</td></tr>
+    <tr><td>Braavos</td><td>18,000</td><td>200</td><td>9,800</td></tr>
+    <tr><td>Volantis</td><td>850,000</td><td>65</td><td>9,756</td></tr>
+  </table>
+</div>
+
+<p><strong>Calculate R for each strain (show to 4 decimal places):</strong></p>
+<table>
+  <tr><th>Strain</th><th>R value</th><th>Rank (1=highest)</th></tr>
+  <tr><td>Highgarden</td><td><input type="text" onchange="saveAns('q1_r_highgarden',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_highgarden',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Winterfell</td><td><input type="text" onchange="saveAns('q1_r_winterfell',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_winterfell',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Dorne</td><td><input type="text" onchange="saveAns('q1_r_dorne',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_dorne',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Gulltown</td><td><input type="text" onchange="saveAns('q1_r_gulltown',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_gulltown',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Braavos</td><td><input type="text" onchange="saveAns('q1_r_braavos',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_braavos',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Volantis</td><td><input type="text" onchange="saveAns('q1_r_volantis',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_volantis',this.value)" style="width:60px;text-align:center;"></td></tr>
+</table>
+
+<p><strong>To which city should the cure be prioritized?</strong></p>
+<input class="answer-input" type="text" placeholder="City name and brief justification..." onchange="saveAns('q1_priority',this.value)">
+
+<p><strong>Multiple Choice — Best explanation for varying virulence across strains:</strong></p>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','A')"> A. Mutations in viral regulatory regions increase viral replication efficiency, resulting in higher viral load.</label>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','B')"> B. The viral strain evolved resistance to commonly prescribed antibiotics in the region.</label>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','C')"> C. Structural mutations in viral surface proteins increase binding affinity to host cell receptors, improving viral entry.</label>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','D')"> D. Reduction of viral genome size automatically increases virulence in all viruses.</label>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','E')"> E. The viral strain produces chloroplast-associated proteins that interfere with human immune responses.</label>
+
+<hr class="section-divider">
+<h3>Sequence Data — Question 1</h3>
+<div class="dataset-box"><span class="seq-header">>Highgarden_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUUGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Winterfell_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGAUGACUACGACGAUGACGUUGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Dorne_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGAUGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUCGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Gulltown_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGAUGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUUGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Volantis_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUUGACGACUACGAUCGACGUGGGACGACCUGA
+
+<span class="seq-header">>Braavos_mRNA</span>
+AUGGCGUAUGACUUCGAUGCCGAUGAUAUUGACAUGAUUGACAUUGAUGACUUCGAUGUUGAUGAUAUUGACAUGGAUGAUGACUUCGAUGAUGCCAUUGAUGACUUCGAAAUUGAUGAUAUUGACAUGA</div>`;
+
+    else if (num === 2) content.innerHTML = `
+<h2>Question 2 — Ancient Plant Genomics</h2>
+<div class="info-box">
+Well-preserved plant remains were recovered from ancient ecological sites. Researchers sequenced genomic DNA from <strong>six specimens (A–F)</strong> to study their evolutionary relationships and photosynthetic strategies (C3 vs C4 pathway).
+</div>
+
+<div class="task-header">
+  <span class="task-num">TASK 1</span>
+  <p>Build a phylogenetic tree — use the <strong>Build Distance Matrix</strong> tool</p>
+</div>
+<p style="font-size:0.8rem;color:var(--text2)">Paste all 6 plant sequences into the Workbench and run <strong>Build Distance Matrix</strong>. Use the distance values to draw the phylogenetic tree <strong>on your exam paper</strong>.</p>
+<div class="info-box" style="border-color:#f5cba7;background:#fff8f0;color:#7d5a1e;">
+  📝 Draw your phylogenetic tree diagram on the <strong>physical exam paper</strong>.
+</div>
+
+<div class="task-header">
+  <span class="task-num">TASK 2</span>
+  <p>Photosynthetic pathway — translate sequences and use Domain Analysis to identify C3 or C4</p>
+</div>
+<p style="font-size:0.8rem;color:var(--text2)">Translate each plant's DNA → protein, then run Domain Analysis to find protein domains (RuBisCO = C3; PEP carboxylase = C4).</p>
+<table>
+  <tr><th>Specimen</th><th>Pathway (C3 / C4)</th></tr>
+  <tr><td>Plant A</td><td><select onchange="saveAns('q2_path_a',this.value)"><option value="">—</option><option>C3</option><option>C4</option></select></td></tr>
+  <tr><td>Plant B</td><td><select onchange="saveAns('q2_path_b',this.value)"><option value="">—</option><option>C3</option><option>C4</option></select></td></tr>
+  <tr><td>Plant C</td><td><select onchange="saveAns('q2_path_c',this.value)"><option value="">—</option><option>C3</option><option>C4</option></select></td></tr>
+  <tr><td>Plant D</td><td><select onchange="saveAns('q2_path_d',this.value)"><option value="">—</option><option>C3</option><option>C4</option></select></td></tr>
+  <tr><td>Plant E</td><td><select onchange="saveAns('q2_path_e',this.value)"><option value="">—</option><option>C3</option><option>C4</option></select></td></tr>
+  <tr><td>Plant F</td><td><select onchange="saveAns('q2_path_f',this.value)"><option value="">—</option><option>C3</option><option>C4</option></select></td></tr>
+</table>
+
+<hr class="section-divider">
+<p><strong>Multiple Choice Questions:</strong></p>
+
+<p><strong>Q2.1</strong> — Which enzyme is most strongly associated with the initial carbon fixation step in C4 photosynthesis?</p>
+<label class="mc-option"><input type="radio" name="q2mc1" onchange="saveAns('q2_mc1','A')"> A. Ribulose-1,5-bisphosphate carboxylase/oxygenase (RuBisCO)</label>
+<label class="mc-option"><input type="radio" name="q2mc1" onchange="saveAns('q2_mc1','B')"> B. Phosphoenolpyruvate carboxylase (PEP carboxylase)</label>
+<label class="mc-option"><input type="radio" name="q2mc1" onchange="saveAns('q2_mc1','C')"> C. ATP synthase</label>
+<label class="mc-option"><input type="radio" name="q2mc1" onchange="saveAns('q2_mc1','D')"> D. Ferredoxin-NADP reductase</label>
+
+<p><strong>Q2.2</strong> — Why does the C4 pathway provide an advantage in hot and dry environments?</p>
+<label class="mc-option"><input type="radio" name="q2mc2" onchange="saveAns('q2_mc2','A')"> A. It increases oxygen concentration around RuBisCO.</label>
+<label class="mc-option"><input type="radio" name="q2mc2" onchange="saveAns('q2_mc2','B')"> B. It reduces photorespiration by concentrating CO₂ around RuBisCO.</label>
+<label class="mc-option"><input type="radio" name="q2mc2" onchange="saveAns('q2_mc2','C')"> C. It prevents stomatal opening entirely.</label>
+<label class="mc-option"><input type="radio" name="q2mc2" onchange="saveAns('q2_mc2','D')"> D. It eliminates the Calvin cycle.</label>
+
+<p><strong>Q2.3</strong> — In C4 plants, where does the Calvin cycle primarily occur?</p>
+<label class="mc-option"><input type="radio" name="q2mc3" onchange="saveAns('q2_mc3','A')"> A. Mesophyll cells</label>
+<label class="mc-option"><input type="radio" name="q2mc3" onchange="saveAns('q2_mc3','B')"> B. Bundle sheath cells</label>
+<label class="mc-option"><input type="radio" name="q2mc3" onchange="saveAns('q2_mc3','C')"> C. Guard cells</label>
+<label class="mc-option"><input type="radio" name="q2mc3" onchange="saveAns('q2_mc3','D')"> D. Epidermal cells</label>
+
+<p><strong>Q2.4</strong> — If a plant genome contains a PEP carboxylase domain, what is the most likely functional implication?</p>
+<label class="mc-option"><input type="radio" name="q2mc4" onchange="saveAns('q2_mc4','A')"> A. The plant performs nitrogen fixation.</label>
+<label class="mc-option"><input type="radio" name="q2mc4" onchange="saveAns('q2_mc4','B')"> B. The plant likely uses the C4 photosynthetic pathway.</label>
+<label class="mc-option"><input type="radio" name="q2mc4" onchange="saveAns('q2_mc4','C')"> C. The plant lacks RuBisCO.</label>
+<label class="mc-option"><input type="radio" name="q2mc4" onchange="saveAns('q2_mc4','D')"> D. The plant cannot perform the Calvin cycle.</label>
+
+<hr class="section-divider">
+<h3>Sequence Data — Question 2</h3>
+<div class="dataset-box"><span class="seq-header">>Plant_A</span>
+ATGCGTACGTTACGATCGATCGATCGTACGTAGCTAGCTACGATCGATCGTACGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCT
+
+<span class="seq-header">>Plant_B</span>
+ATGCGTACGTTACGATCGATCGATCGTACGTAGCTAGCTACGATCGATCGTACGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTGGCTAGCT
+
+<span class="seq-header">>Plant_C</span>
+ATGCGTACGTTACGATCGATCGATCGTACGTAGCTAGCTACGATCGATCGTACGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTGGCTAGCT
+
+<span class="seq-header">>Plant_D</span>
+ATGCGTACGTTACGATCGATCGATCGTACGTAGCTAGCTACGATCGATCGTACGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTGGCTAGCT
+
+<span class="seq-header">>Plant_E</span>
+ATGCGTACGTTACGATCGATCGATCGTACGTAGCTAGCTACGATCGATCGTACGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTGGCTAGCT
+
+<span class="seq-header">>Plant_F</span>
+ATGCGTACGTTACGATCGATCGATCGTACGTAGCTAGCTACGATCGATCGTACGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTAGCTAGCTAGCTACGATCGATCGTAGCTAGCTACGATCGATCGTGGCTAGCT</div>`;
+
+    else if (num === 3) content.innerHTML = `
+<h2>Question 3 — Transposable Elements &amp; Oncogenesis</h2>
+<div class="info-box">
+~45–50% of the human genome consists of repetitive DNA from transposable elements (TEs). When transposons insert near oncogenes or tumor suppressor genes, they can contribute to tumorigenesis.
+<br><br>
+<strong>TE Reference:</strong> LINE-1 (~6000 bp, AT-rich, polyA tail) · Alu (~300 bp, GC-rich) · HERV (~7–10 kb, LTR structure, gag/pol/env genes)
+</div>
+
+<div class="task-header">
+  <span class="task-num">TASK 1</span>
+  <p>Identify the transposable element type in each patient sequence (one TE per case)</p>
+</div>
+<p style="font-size:0.8rem;color:var(--text2)">Analyze each sequence's characteristics (length, GC content, structural features). Match to LINE-1, Alu, or HERV.</p>
+<table>
+  <tr><th>Patient / Cancer</th><th>TE Type</th></tr>
+  <tr><td>Patient 1 — Lung</td>
+      <td><select onchange="saveAns('q3_te1',this.value)"><option value="">—</option><option>LINE-1</option><option>Alu</option><option>HERV</option></select></td></tr>
+  <tr><td>Patient 2 — Breast</td>
+      <td><select onchange="saveAns('q3_te2',this.value)"><option value="">—</option><option>LINE-1</option><option>Alu</option><option>HERV</option></select></td></tr>
+  <tr><td>Patient 3 — Pancreatic</td>
+      <td><select onchange="saveAns('q3_te3',this.value)"><option value="">—</option><option>LINE-1</option><option>Alu</option><option>HERV</option></select></td></tr>
+</table>
+
+<div class="task-header">
+  <span class="task-num">TASK 2</span>
+  <p>Analyze transposon location — will each insertion upregulate or downregulate uncontrolled growth?</p>
+</div>
+<div class="info-box" style="font-size:0.8rem;">
+<strong>Distance from TSS:</strong> &lt;500 bp = strong regulatory effect · 500–2000 bp = moderate · &gt;2000 bp = weak<br>
+Insert near <strong>oncogene</strong> → may upregulate growth · Insert near <strong>tumor suppressor</strong> → may downregulate growth control (i.e. upregulate cancer)
+</div>
+<table>
+  <tr><th>Cancer</th><th>Gene</th><th>Distance to TSS (bp) — enter your value</th><th>Effect on uncontrolled growth</th></tr>
+  <tr><td>Lung</td><td>MET (oncogene)</td><td><input type="number" placeholder="bp" onchange="saveAns('q3_tss1',this.value)" style="width:100px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;"></td><td><select onchange="saveAns('q3_eff1',this.value)"><option value="">—</option><option>Upregulates uncontrolled growth</option><option>Downregulates uncontrolled growth</option></select></td></tr>
+  <tr><td>Breast</td><td>LIN28B (oncogene)</td><td><input type="number" placeholder="bp" onchange="saveAns('q3_tss2',this.value)" style="width:100px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;"></td><td><select onchange="saveAns('q3_eff2',this.value)"><option value="">—</option><option>Upregulates uncontrolled growth</option><option>Downregulates uncontrolled growth</option></select></td></tr>
+  <tr><td>Pancreatic</td><td>Tumor Suppressor</td><td><input type="number" placeholder="bp" onchange="saveAns('q3_tss3',this.value)" style="width:100px;padding:6px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;"></td><td><select onchange="saveAns('q3_eff3',this.value)"><option value="">—</option><option>Upregulates uncontrolled growth</option><option>Downregulates uncontrolled growth</option></select></td></tr>
+</table>
+
+<div class="task-header">
+  <span class="task-num">TASK 3</span>
+  <p>Oncogenic Potential Score — rank each insertion highest to lowest</p>
+</div>
+<div class="formula-box">
+  \\[ V = \\frac{1}{\\text{TSS distance (bp)}} \\times \\text{Promoter Activity} \\times \\text{Cancer Specificity} \\]
+</div>
+<div class="info-box" style="font-size:0.8rem;">
+  <strong>Promoter Activity Coefficients:</strong> LINE-1 = 1.0 · Alu = 0.6 · HERV = 0.8<br>
+  <strong>Epigenetic modifier:</strong> Hypomethylated = active · Hypermethylated = suppressed (treat as 0.5× if hypermethylated)<br>
+  <strong>Cancer Specificity:</strong> High = 3 · Medium = 2 · Low = 1<br><br>
+  Data: Lung/MET · 500 bp · Hypomethylated · High(3) &nbsp;|&nbsp; Breast/LIN28B · 1200 bp · Hypomethylated · Medium(2) &nbsp;|&nbsp; Pancreatic/TSG · 3000 bp · Hypermethylated · Low(1)
+</div>
+<table>
+  <tr><th>Cancer</th><th>V Score (show calculation)</th><th>Rank (1=highest)</th></tr>
+  <tr><td>Lung (MET)</td><td><input type="text" onchange="saveAns('q3_vscore1',this.value)"></td><td><input type="text" style="width:60px;text-align:center;" onchange="saveAns('q3_vrank1',this.value)"></td></tr>
+  <tr><td>Breast (LIN28B)</td><td><input type="text" onchange="saveAns('q3_vscore2',this.value)"></td><td><input type="text" style="width:60px;text-align:center;" onchange="saveAns('q3_vrank2',this.value)"></td></tr>
+  <tr><td>Pancreatic (TSG)</td><td><input type="text" onchange="saveAns('q3_vscore3',this.value)"></td><td><input type="text" style="width:60px;text-align:center;" onchange="saveAns('q3_vrank3',this.value)"></td></tr>
+</table>
+
+<hr class="section-divider">
+<h3>Sequence Data — Question 3</h3>
+<div class="dataset-box"><span class="seq-header">>Patient_1_Lung</span>
+TTTAAAGGATGAGGCAGTGGATTTCTGAGACAGGTCTCGCTGATCACTTTTTTGAGACAGGGTCTTGCTCTGTCACCCAGGCTGGAGTGCAGTGGCACGATCTTGGCTCACTGCAACCTCCGCCTCCTGGGTTCAAGCGATTCTCCTGCCTCAGCCTCCCAAGTAGCTGGGACTACAGGTGCCCGCCACCACGCCTGGTAAAAAAAA
+
+<span class="seq-header">>Patient_2_Breast</span>
+GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGGGAGGCCGAGGCGGGCGGATCACCTGAGGTCAGGAGTTTGAGACCAGCCTGGCCAACATGGTGAAACCCCGTCTCTACTAAAAATACAAAAATTAGCCGGGCATGGTGGCGGGCGCCTGTAATCCCAGCTACTCGGGAGGCTGAGGCAGGAGAAT
+
+<span class="seq-header">>Patient_3_Pancreatic</span>
+GGCCGGGCGCGGTGGCTCACGCCTGTAATCCCAGCACTTTGGGAGGCCGAGGCGGGCGGATCACCTGAGGTCAGGAGTTTGAGACCAGCCTGGCCAACATGGTGAAACCCCGTCTCTACTAAAAATACAAAAATTAGCCGGGCATGGTGGCGGGCGCCTGTAATCCCAGCTACTCGGGAGGCTGAGGCAGGAGAAT</div>`;
+
+    else if (num === 4) content.innerHTML = `
+<h2>Question 4 — BRCA1 Familial Cancer &amp; Pedigree Analysis</h2>
+<div class="info-box">
+HBOC syndrome is linked to pathogenic variants in <strong>BRCA1</strong> (DNA double-strand break repair). Unlike classical Mendelian diseases, BRCA1 shows <strong>incomplete penetrance</strong> — not all carriers develop cancer.
+</div>
+
+<div class="info-box" style="font-size:0.8rem;">
+  <strong>Family structure:</strong><br>
+  Generation I: I-1 (♂, no cancer) × I-2 (♀, breast cancer)<br>
+  Generation II: II-1 (♀, cancer), II-2 (♂, no), II-3 (♀, no), II-4 (♀, cancer) — children of I-1 & I-2<br>
+  Generation III: III-1 (♀, no), III-2 (♀, cancer) — children of II-1 &nbsp;|&nbsp; III-3 (♂, no), III-4 (♀, no) — children of II-4
+</div>
+
+<div class="task-header">
+  <span class="task-num">TASK 1</span>
+  <p>Analyze BRCA1 sequences and create a pedigree diagram</p>
+</div>
+<p style="font-size:0.8rem;color:var(--text2)">Align each individual's sequence against I-1 (reference/wild-type) using the Workbench. Identify who carries the mutation. Draw the pedigree on your exam paper.</p>
+
+<div class="pedigree-legend">
+  <div class="legend-item"><span class="legend-sym"></span> Unaffected male (□)</div>
+  <div class="legend-item"><span class="legend-sym filled"></span> Affected male (■)</div>
+  <div class="legend-item"><span class="legend-sym circle"></span> Unaffected female (○)</div>
+  <div class="legend-item"><span class="legend-sym circle filled"></span> Affected female (●)</div>
+  <div class="legend-item">* = mutation carrier (no cancer)</div>
+</div>
+
+<div class="info-box" style="border-color:#f5cba7;background:#fff8f0;color:#7d5a1e;">
+  📝 Draw your pedigree diagram on the <strong>physical exam paper</strong>.
+</div>
+
+<p><strong>List individuals who carry the BRCA1 mutation:</strong></p>
+<input class="answer-input" type="text" placeholder="e.g. I-2, II-1, II-4, III-2..." onchange="saveAns('q4_carriers',this.value)">
+
+<div class="task-header">
+  <span class="task-num">TASK 2</span>
+  <p>Determine the most likely mode of inheritance</p>
+</div>
+<label class="mc-option"><input type="radio" name="q4_mode" onchange="saveAns('q4_mode','AD')"> Autosomal Dominant</label>
+<label class="mc-option"><input type="radio" name="q4_mode" onchange="saveAns('q4_mode','AR')"> Autosomal Recessive</label>
+<label class="mc-option"><input type="radio" name="q4_mode" onchange="saveAns('q4_mode','XD')"> X-linked Dominant</label>
+<label class="mc-option"><input type="radio" name="q4_mode" onchange="saveAns('q4_mode','XR')"> X-linked Recessive</label>
+<label class="mc-option"><input type="radio" name="q4_mode" onchange="saveAns('q4_mode','MT')"> Mitochondrial</label>
+
+<div class="task-header">
+  <span class="task-num">TASK 3</span>
+  <p>Calculate mutation penetrance</p>
+</div>
+<div class="formula-box">
+  \\[ \\text{Penetrance} = \\frac{\\text{Affected carriers}}{\\text{Total carriers}} \\times 100\\% \\]
+</div>
+<table>
+  <tr><th>Parameter</th><th>Your Answer</th></tr>
+  <tr><td>Calculated penetrance (%)</td><td><input type="text" placeholder="e.g. 66.7%" onchange="saveAns('q4_penetrance',this.value)"></td></tr>
+</table>
+
+<hr class="section-divider">
+<h3>BRCA1 Exon 11 Sequences</h3>
+<div class="dataset-box"><span class="seq-header">>I-1_Male (Reference / Wild-type)</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>I-2_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>II-1_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>II-2_Male</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>II-3_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>II-4_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>III-1_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>III-2_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>III-3_Male</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>III-4_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG</div>`;
+
+    content.scrollTo(0, 0);
+    if (window.MathJax) MathJax.typesetPromise();
+}
+
+/* ════════════════════════════════════════════════
+   BIO-WORKBENCH TOOLS
+════════════════════════════════════════════════ */
+function runTranscription() {
+    const input = document.getElementById('seq-input').value.trim();
+    const lines = input.split('\n');
+    let result = '=== DNA → mRNA Transcription ===\n\n';
+    let segments = [{ type: 'text', val: result }];
+    let current = '';
+    let header = '';
+
+    const processSeq = (hdr, dna) => {
+        const rna = dna.toUpperCase().replace(/T/g,'U').replace(/[^AUGC]/g,'');
+        segments.push({ type: 'text', val: hdr + '\n' });
+        // Find all start (AUG) and stop (UAA, UAG, UGA) codons
+        const STOPS = ['UAA','UAG','UGA'];
+        let remaining = rna;
+        while (remaining.length > 0) {
+            // find nearest special codon
+            let bestIdx = Infinity, bestCodon = null;
+            for (const codon of ['AUG', ...STOPS]) {
+                const idx = remaining.indexOf(codon);
+                if (idx !== -1 && idx < bestIdx) { bestIdx = idx; bestCodon = codon; }
+            }
+            if (bestCodon === null) { segments.push({ type: 'text', val: remaining }); break; }
+            if (bestIdx > 0) segments.push({ type: 'text', val: remaining.slice(0, bestIdx) });
+            segments.push({ type: STOPS.includes(bestCodon) ? 'stop' : 'aug', val: bestCodon });
+            remaining = remaining.slice(bestIdx + 3);
+        }
+        segments.push({ type: 'text', val: '\n\n' });
+    };
+
+    for (const line of lines) {
+        if (line.startsWith('>')) {
+            if (header && current) processSeq(header, current);
+            header = line; current = '';
+        } else {
+            current += line.replace(/\s/g,'');
+        }
+    }
+    if (header && current) processSeq(header, current);
+    if (!header) {
+        // no FASTA header, raw input
+        const rna = input.toUpperCase().replace(/T/g,'U').replace(/[^AUGC]/g,'');
+        segments = [{ type: 'text', val: '=== DNA → mRNA Transcription ===\n\n' }];
+        const STOPS2 = ['UAA','UAG','UGA'];
+        let remaining = rna;
+        while (remaining.length > 0) {
+            let bestIdx = Infinity, bestCodon = null;
+            for (const codon of ['AUG', ...STOPS2]) {
+                const idx = remaining.indexOf(codon);
+                if (idx !== -1 && idx < bestIdx) { bestIdx = idx; bestCodon = codon; }
+            }
+            if (bestCodon === null) { segments.push({ type: 'text', val: remaining }); break; }
+            if (bestIdx > 0) segments.push({ type: 'text', val: remaining.slice(0, bestIdx) });
+            segments.push({ type: STOPS2.includes(bestCodon) ? 'stop' : 'aug', val: bestCodon });
+            remaining = remaining.slice(bestIdx + 3);
+        }
+    }
+
+    // Render into result display as HTML
+    const out = document.getElementById('result-display');
+    out.innerHTML = segments.map(s => {
+        if (s.type === 'aug')  return `<mark style="background:#e67e22;color:#fff;font-weight:800;padding:1px 3px;border-radius:3px;font-family:'JetBrains Mono',monospace;" title="Start codon">▶${s.val}</mark>`;
+        if (s.type === 'stop') return `<mark style="background:#f85149;color:#fff;font-weight:800;padding:1px 3px;border-radius:3px;font-family:'JetBrains Mono',monospace;" title="Stop codon">■${s.val}</mark>`;
+        return s.val.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    }).join('');
+}
+
+function runTranslation() {
+    document.getElementById('result-display').innerHTML = '';
+    const CODON = {"GCU":"A","GCC":"A","GCA":"A","GCG":"A","UGU":"C","UGC":"C","DAU":"D","GAU":"D","GAC":"D","GAA":"E","GAG":"E","UUU":"F","UUC":"F","GGU":"G","GGC":"G","GGA":"G","GGG":"G","CAU":"H","CAC":"H","AUU":"I","AUC":"I","AUA":"I","AAA":"K","AAG":"K","UUA":"L","UUG":"L","CUU":"L","CUC":"L","CUA":"L","CUG":"L","AUG":"M","AAU":"N","AAC":"N","CCU":"P","CCC":"P","CCA":"P","CCG":"P","CAA":"Q","CAG":"Q","CGU":"R","CGC":"R","CGA":"R","CGG":"R","AGA":"R","AGG":"R","UCU":"S","UCC":"S","UCA":"S","UCG":"S","AGU":"S","AGC":"S","ACU":"T","ACC":"T","ACA":"T","ACG":"T","GUU":"V","GUC":"V","GUA":"V","GUG":"V","UGG":"W","UAU":"Y","UAC":"Y","UAA":"*","UAG":"*","UGA":"*"};
+    const input = document.getElementById('seq-input').value.trim();
+    const blocks = input.split('>').filter(x => x.trim());
+    let result = '=== mRNA → Protein Translation ===\n\n';
+    if (blocks.length === 0) {
+        const seq = input.toUpperCase().replace(/T/g,'U').replace(/[^AUGC]/g,'');
+        let prot = '';
+        for(let i=0; i<seq.length-2; i+=3) prot += (CODON[seq.substr(i,3)] || '?');
+        result += 'Direct input:\n' + prot;
+    } else {
+        for (const block of blocks) {
+            const lines = block.split('\n');
+            const header = lines[0].trim();
+            const seq = lines.slice(1).join('').replace(/\s/g,'').toUpperCase().replace(/T/g,'U').replace(/[^AUGC]/g,'');
+            let prot = ''; let started = false;
+            for(let i=0; i<seq.length-2; i+=3) {
+                const aa = CODON[seq.substr(i,3)] || '?';
+                if(aa === 'M') started = true;
+                if(started) { if(aa === '*') { prot += '*'; break; } prot += aa; }
+            }
+            result += '>' + header + '\n' + (prot || '(no start codon found)') + '\n\n';
+        }
+    }
+    document.getElementById('result-display').innerText = result;
+}
+
+function runSimpleAlignment() {
+    document.getElementById('result-display').innerHTML = '';
+    const input = document.getElementById('seq-input').value.trim();
+    const blocks = input.split('>').filter(x => x.trim());
+    if (blocks.length < 2) { alert('Paste at least 2 FASTA sequences for alignment.'); return; }
+    const names = blocks.map(b => b.split('\n')[0].trim());
+    const seqs = blocks.map(b => b.split('\n').slice(1).join('').replace(/\s/g,'').toUpperCase());
+    const ref = seqs[0];
+    let result = `=== Pairwise Alignment vs. ${names[0]} ===\n\n`;
+
+    for (let i = 1; i < seqs.length; i++) {
+        const s = seqs[i];
+        const L = Math.max(ref.length, s.length);
+        let matches = 0, mismatches = 0;
+        let refLine = '', matchLine = '', qLine = '';
+
+        for (let j = 0; j < L; j++) {
+            const r = ref[j] || '-';
+            const q = s[j]   || '-';
+            if (r === q) { matches++; matchLine += '|'; }
+            else         { mismatches++; matchLine += 'X'; }
+            refLine += r;
+            qLine   += q;
+        }
+
+        const pct = ((matches / L) * 100).toFixed(2);
+
+        result += `${names[i]}\n`;
+        result += `Identity: ${pct}%  |  Matches: ${matches}  |  Mismatches: ${mismatches}\n\n`;
+
+        // print in chunks of 60 chars
+        const CHUNK = 60;
+        for (let j = 0; j < L; j += CHUNK) {
+            const pos = j + 1;
+            result += `Ref  [${String(pos).padStart(4)}]  ${refLine.slice(j, j+CHUNK)}\n`;
+            result += `              ${matchLine.slice(j, j+CHUNK)}\n`;
+            result += `Qry  [${String(pos).padStart(4)}]  ${qLine.slice(j, j+CHUNK)}\n\n`;
+        }
+        result += '─'.repeat(70) + '\n\n';
+    }
+    document.getElementById('result-display').innerText = result;
+}
+
+function runPhyloTree() {
+    document.getElementById('result-display').innerHTML = '';
+    const input = document.getElementById('seq-input').value.trim();
+    const blocks = input.split('>').filter(x => x.trim());
+    if (blocks.length < 2) { alert('Paste at least 2 FASTA sequences.'); return; }
+    const names = blocks.map(b => b.split('\n')[0].trim().substring(0,12));
+    const seqs = blocks.map(b => b.split('\n').slice(1).join('').replace(/\s/g,'').toUpperCase());
+    let result = '=== SNP Distance Matrix ===\n\n';
+    const colW = 13;
+    result += ' '.repeat(colW) + names.map(n => n.padEnd(colW)).join('') + '\n';
+    for (let i = 0; i < seqs.length; i++) {
+        result += names[i].padEnd(colW);
+        for (let j = 0; j < seqs.length; j++) {
+            const L = Math.min(seqs[i].length, seqs[j].length);
+            let d = 0;
+            for (let k = 0; k < L; k++) if (seqs[i][k] !== seqs[j][k]) d++;
+            result += d.toString().padEnd(colW);
+        }
+        result += '\n';
+    }
+    result += '\n(Lower value = more similar / closer on tree)';
+    document.getElementById('result-display').innerText = result;
+}
+
+async function runDomainAnalysis() {
+    const seq = document.getElementById('seq-input').value.trim();
+    if (!seq || seq.startsWith('>')) { alert('Paste a raw protein sequence only (no FASTA header). First translate your sequence, then paste the protein.'); return; }
+    const out = document.getElementById('result-display');
+    out.innerText = 'Submitting to EBI InterPro (iprscan5)...\nThis may take 30–120 seconds.';
+    try {
+        const r = await fetch('https://www.ebi.ac.uk/Tools/services/rest/iprscan5/run', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ email: EBI_EMAIL, sequence: seq })
+        });
+        const id = await r.text();
+        out.innerText = `Job submitted!\nJob ID: ${id}\nPolling for results every 10s...`;
+        const poll = setInterval(async () => {
+            try {
+                const st = await (await fetch(`https://www.ebi.ac.uk/Tools/services/rest/iprscan5/status/${id}`)).text();
+                out.innerText = `Job ID: ${id}\nStatus: ${st}\n\nWaiting for completion...`;
+                if (st === 'FINISHED') {
+                    clearInterval(poll);
+                    const res = await (await fetch(`https://www.ebi.ac.uk/Tools/services/rest/iprscan5/result/${id}/txt`)).text();
+                    out.innerText = `=== InterPro Domain Results ===\nJob: ${id}\n\n${res}`;
+                }
+            } catch(e) { clearInterval(poll); out.innerText = 'Polling error: ' + e.message; }
+        }, 10000);
+    } catch(e) { out.innerText = 'EBI API error: ' + e.message + '\n\nCheck network connection.'; }
+}
+
+/* ════════════════════════════════════════════════
+   EXAM CONTROL
+════════════════════════════════════════════════ */
+function startExam() {
+    const name = document.getElementById('student-name').value.trim();
+    const region = document.getElementById('student-region').value;
+    const school = document.getElementById('student-school').value.trim();
+    if (!name) { alert('Please enter your full name.'); return; }
+    if (!region) { alert('Please select your region.'); return; }
+    if (!school) { alert('Please enter your school name.'); return; }
+
+    examData = { name, region, school, startTime: new Date().toISOString() };
+
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('exam-interface').classList.remove('hidden');
+    document.getElementById('display-name').textContent = name;
+    document.getElementById('display-region').textContent = region;
+
+    showScenario(1);
+    startTimer();
+}
+
+function startTimer() {
+    let time = EXAM_MINS * 60;
+    const display = document.getElementById('timer-display');
+    timerInterval = setInterval(() => {
+        const m = Math.floor(time / 60), s = time % 60;
+        display.textContent = `${m}:${s < 10 ? '0'+s : s}`;
+        display.className = time > 1800 ? 'ok' : time > 600 ? '' : 'warn';
+        if (time <= 0) { clearInterval(timerInterval); finalSubmit(true); }
+        time--;
+    }, 1000);
+}
+
+function downloadAnswers() {
+    examData.downloadTime = new Date().toISOString();
+    const blob = new Blob([JSON.stringify(examData, null, 2)], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `NBO2026_Backup_${examData.name || 'student'}_${Date.now()}.json`;
+    a.click();
+}
+
+async function finalSubmit(auto = false) {
+    if (!auto && !confirm('Are you sure you want to submit your exam? This cannot be undone.')) return;
+    clearInterval(timerInterval);
+    examData.submitTime = new Date().toISOString();
+    downloadAnswers();
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(examData) });
+        document.getElementById('exam-interface').innerHTML = `
+            <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:var(--bg);">
+                <div style="text-align:center;padding:60px;">
+                    <div style="font-size:3rem;margin-bottom:24px;">✅</div>
+                    <h2 style="color:var(--accent2);font-size:1.6rem;margin-bottom:12px;">Exam Submitted Successfully</h2>
+                    <p style="color:var(--text2);font-size:0.95rem;">Your answers have been recorded. A backup copy was downloaded to your device.</p>
+                    <p style="color:var(--text2);font-size:0.85rem;margin-top:12px;">Thank you, <strong style="color:var(--text)">${examData.name}</strong>.</p>
+                </div>
+            </div>`;
+    } catch(e) {
+        alert('Server submission failed. Please email your backup file to the instructor immediately.\n\nA backup has been downloaded.');
+    }
+}
+
+/* ════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════ */
+window.onload = () => {
+    const sel = document.getElementById('student-region');
+    regions.forEach(r => {
+        const o = document.createElement('option');
+        o.value = o.textContent = r;
+        sel.appendChild(o);
+    });
+};
+</script>
+</body>
+</html>
