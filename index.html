@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NBO 2026 — Bioinformatics Section</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        :root {
+            --bg: #f7f8fa;
+            --surface: #ffffff;
+            --surface2: #f0f2f5;
+            --border: #d0d7de;
+            --border2: #e4e8ed;
+            --accent: #1a56a0;
+            --accent-light: #e8f0fb;
+            --accent2: #1a7a3c;
+            --accent2-light: #e6f4ec;
+            --accent3: #c0392b;
+            --accent3-light: #fdf0ef;
+            --accent4: #6b21a8;
+            --text: #1c2333;
+            --text2: #57606a;
+            --text3: #8c959f;
+            --timer-warn: #b45309;
+            --timer-danger: #c0392b;
+            --header-bg: #1a2a4a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ── LOGIN ── */
+        #login-screen {
+            position: fixed; inset: 0;
+            background: linear-gradient(135deg, #1a2a4a 0%, #1e3a6e 60%, #163060 100%);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+
+        .login-box {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 44px 40px;
+            width: 440px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+        }
+
+        .login-logo {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 28px; padding-bottom: 24px;
+            border-bottom: 2px solid var(--border2);
+        }
+
+        .login-logo .dna-icon {
+            width: 46px; height: 46px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+
+        .login-logo h1 {
+            font-size: 1rem; font-weight: 700; color: var(--text);
+            line-height: 1.3;
+        }
+
+        .login-logo p { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+
+        .field-label {
+            font-size: 0.73rem; font-weight: 700;
+            color: var(--text2); text-transform: uppercase;
+            letter-spacing: 0.07em; margin-bottom: 6px; margin-top: 18px;
+        }
+
+        .login-box input, .login-box select {
+            width: 100%; padding: 11px 13px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.93rem;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .login-box input:focus, .login-box select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(26,86,160,0.12);
+        }
+
+        #start-btn {
+            width: 100%; margin-top: 26px; padding: 13px;
+            background: var(--accent); color: #fff;
+            border: none; border-radius: 6px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700;
+            cursor: pointer; transition: background 0.2s, transform 0.1s;
+            letter-spacing: 0.04em;
+        }
+
+        #start-btn:hover { background: #1648a0; transform: translateY(-1px); }
+
+        .exam-rules {
+            margin-top: 18px; padding: 12px 14px;
+            background: #fff8f0; border: 1px solid #f5cba7;
+            border-radius: 6px; font-size: 0.79rem; color: #7d5a1e; line-height: 1.6;
+        }
+
+        /* ── HEADER ── */
+        header {
+            height: 58px; flex-shrink: 0;
+            background: var(--header-bg);
+            padding: 0 22px;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .header-brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 0.88rem; font-weight: 700; color: #ffffff;
+            white-space: nowrap; letter-spacing: 0.02em;
+        }
+
+        .header-brand span { color: #7eb3f5; }
+
+        #timer-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem; font-weight: 700;
+            padding: 6px 16px; border-radius: 5px;
+            background: rgba(255,255,255,0.08);
+            color: #f9c74f;
+            border: 1px solid rgba(255,255,255,0.15);
+            transition: all 0.5s;
+            min-width: 90px; text-align: center;
+        }
+
+        #timer-display.warn { color: #f4a261; background: rgba(244,162,97,0.15); border-color: rgba(244,162,97,0.3); }
+        #timer-display.ok   { color: #90e0b0; background: rgba(144,224,176,0.1);  border-color: rgba(144,224,176,0.25); }
+
+        #user-info {
+            font-size: 0.8rem; color: rgba(255,255,255,0.7);
+            display: flex; align-items: center; gap: 8px;
+        }
+
+        .user-badge {
+            background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 0.76rem;
+        }
+
+        .btn-header {
+            padding: 7px 14px; border-radius: 5px;
+            border: 1px solid rgba(255,255,255,0.25);
+            font-family: 'DM Sans', sans-serif; font-size: 0.77rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+            background: rgba(255,255,255,0.08); color: #fff;
+        }
+
+        .btn-header:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.4); }
+
+        .btn-submit {
+            background: #c0392b; border-color: #c0392b; color: #fff; font-weight: 700;
+        }
+
+        .btn-submit:hover { background: #a93226; border-color: #a93226; }
+
+        /* ── MAIN LAYOUT ── */
+        main {
+            display: flex; flex: 1;
+            height: calc(100vh - 58px);
+            overflow: hidden;
+        }
+
+        #scenario-panel {
+            width: 55%; display: flex; flex-direction: column;
+            border-right: 2px solid var(--border);
+        }
+
+        #workbench-panel {
+            width: 45%; display: flex; flex-direction: column;
+            padding: 14px; gap: 12px; overflow: hidden;
+            background: var(--bg);
+        }
+
+        /* ── TABS ── */
+        .tab-bar {
+            display: flex; gap: 2px; padding: 10px 14px 0;
+            background: var(--surface2);
+            border-bottom: 2px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            padding: 8px 16px; border: 1px solid transparent;
+            border-bottom: none; background: transparent;
+            color: var(--text2); cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 600;
+            transition: all 0.15s;
+        }
+
+        .tab-btn:hover { color: var(--accent); background: rgba(26,86,160,0.05); }
+
+        .tab-btn.active {
+            background: var(--surface);
+            border-color: var(--border);
+            border-bottom-color: var(--surface);
+            color: var(--accent);
+            margin-bottom: -2px;
+            font-weight: 700;
+        }
+
+        /* ── CONTENT ── */
+        #scenario-content {
+            flex: 1; overflow-y: auto;
+            padding: 26px 30px;
+            background: var(--surface);
+            line-height: 1.7;
+        }
+
+        #scenario-content h2 {
+            font-size: 1.05rem; font-weight: 800;
+            color: var(--accent); margin-bottom: 6px;
+            padding-bottom: 10px; border-bottom: 2px solid var(--border2);
+        }
+
+        #scenario-content h3 {
+            font-size: 0.78rem; font-weight: 800;
+            color: var(--text3); margin: 22px 0 10px;
+            text-transform: uppercase; letter-spacing: 0.07em;
+        }
+
+        #scenario-content p {
+            font-size: 0.89rem; color: var(--text2); margin: 12px 0 8px;
+        }
+
+        .task-header {
+            display: flex; align-items: center; gap: 10px;
+            margin: 22px 0 12px; padding: 11px 15px;
+            background: var(--accent-light);
+            border: 1px solid #bfd4f0;
+            border-radius: 7px; border-left: 4px solid var(--accent);
+        }
+
+        .task-num {
+            background: var(--accent); color: #fff;
+            font-size: 0.68rem; font-weight: 800;
+            padding: 3px 8px; border-radius: 4px;
+            letter-spacing: 0.06em; white-space: nowrap;
+        }
+
+        .task-header p { margin: 0; font-size: 0.87rem; color: var(--text); font-weight: 600; }
+
+        /* ── INPUTS ── */
+        .mc-option {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 11px 14px; margin: 5px 0;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 7px; cursor: pointer; transition: all 0.15s;
+            font-size: 0.87rem; color: var(--text);
+        }
+
+        .mc-option:hover { border-color: var(--accent); background: var(--accent-light); }
+        .mc-option input { margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; }
+
+        .answer-input {
+            width: 100%; padding: 9px 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s; margin: 5px 0;
+        }
+
+        .answer-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(26,86,160,0.1);
+        }
+
+        textarea.answer-input { resize: vertical; min-height: 70px; }
+
+        .formula-box {
+            background: #fffdf0;
+            border: 1px solid #e8d87a;
+            border-radius: 7px; padding: 14px;
+            text-align: center; margin: 14px 0;
+            font-size: 0.9rem; color: var(--text);
+        }
+
+        .dataset-box {
+            background: #1e2a3a;
+            border: 1px solid #344563;
+            border-left: 4px solid #3a8c5c;
+            border-radius: 7px; padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.71rem; color: #a8e6c4;
+            white-space: pre-wrap; margin: 10px 0;
+            max-height: 220px; overflow-y: auto;
+            line-height: 1.65;
+        }
+
+        .dataset-box .seq-header { color: #7eb3f5; font-weight: 700; }
+
+        table {
+            width: 100%; border-collapse: collapse; margin: 10px 0;
+            font-size: 0.85rem; border: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--surface2); color: var(--text2);
+            padding: 9px 12px; text-align: left;
+            border: 1px solid var(--border); font-weight: 700;
+            font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 8px 11px; border: 1px solid var(--border);
+            color: var(--text); vertical-align: middle; background: var(--surface);
+        }
+
+        tr:nth-child(even) td { background: #fafbfc; }
+
+        td input, td select {
+            width: 100%; padding: 5px 8px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 4px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.82rem; outline: none;
+        }
+
+        td input:focus, td select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(26,86,160,0.1);
+        }
+
+        .select-input {
+            width: 100%; padding: 9px 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.88rem;
+            outline: none; margin: 5px 0; cursor: pointer;
+        }
+
+        /* ── WORKBENCH ── */
+        .tool-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 8px; padding: 14px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        .tool-card h3 {
+            font-size: 0.73rem; font-weight: 800; color: var(--text2);
+            text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 10px;
+        }
+
+        #seq-input {
+            width: 100%; height: 108px;
+            background: #1e2a3a; border: 1px solid #344563;
+            border-radius: 6px; color: #a8e6c4;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.71rem;
+            padding: 10px; resize: none; outline: none;
+        }
+
+        #seq-input:focus { border-color: #3a8c5c; }
+        #seq-input::placeholder { color: #6b7a8d; font-family: 'DM Sans', sans-serif; font-size: 0.79rem; }
+
+        .button-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 8px;
+        }
+
+        .btn-tool {
+            padding: 8px 8px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 5px; color: var(--text);
+            font-family: 'DM Sans', sans-serif; font-size: 0.77rem; font-weight: 600;
+            cursor: pointer; transition: all 0.15s;
+        }
+
+        .btn-tool:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+        .btn-tool.green:hover { border-color: var(--accent2); color: var(--accent2); background: var(--accent2-light); }
+        .btn-tool.wide {
+            grid-column: span 2;
+            background: var(--accent-light); border-color: #bfd4f0; color: var(--accent);
+        }
+        .btn-tool.wide:hover { background: #d4e6f8; border-color: var(--accent); }
+
+        .output-container { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+        #result-display {
+            flex: 1; overflow-y: auto;
+            background: #1e2a3a; border: 1px solid #344563;
+            border-radius: 7px; padding: 14px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.74rem;
+            color: #a8e6c4; line-height: 1.75;
+            white-space: pre-wrap;
+        }
+
+        .result-label {
+            font-size: 0.69rem; font-weight: 800; color: var(--text3);
+            text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+        /* Info box */
+        .info-box {
+            background: var(--accent-light);
+            border: 1px solid #bfd4f0;
+            border-radius: 7px; padding: 13px 15px;
+            font-size: 0.83rem; color: var(--text2); margin: 12px 0;
+            line-height: 1.65;
+        }
+
+        .info-box strong { color: var(--text); }
+
+        /* Ranking inputs */
+        .rank-row {
+            display: flex; align-items: center; gap: 10px; margin: 6px 0;
+        }
+
+        .rank-row label { font-size: 0.85rem; color: var(--text); min-width: 120px; }
+
+        .rank-row input {
+            width: 80px; padding: 6px 10px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 5px; color: var(--text);
+            font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+            outline: none; text-align: center;
+        }
+
+        .pedigree-legend {
+            display: flex; flex-wrap: wrap; gap: 14px;
+            margin: 10px 0; padding: 11px 14px;
+            background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 7px; font-size: 0.79rem; color: var(--text2);
+        }
+
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-sym {
+            width: 17px; height: 17px;
+            border: 2px solid var(--text2); display: inline-block;
+        }
+        .legend-sym.circle { border-radius: 50%; }
+        .legend-sym.filled { background: var(--text); border-color: var(--text); }
+
+        .section-divider {
+            border: none; border-top: 1px solid var(--border2); margin: 20px 0;
+        }
+
+        .tag-pill {
+            display: inline-block;
+            padding: 2px 8px; border-radius: 12px;
+            font-size: 0.71rem; font-weight: 700; margin-left: 6px;
+        }
+
+        .tag-pill.blue  { background: var(--accent-light); color: var(--accent); }
+        .tag-pill.green { background: var(--accent2-light); color: var(--accent2); }
+        .tag-pill.red   { background: var(--accent3-light); color: var(--accent3); }
+    </style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="login-screen">
+    <div class="login-box">
+        <div style="display:flex;justify-content:flex-end;gap:6px;margin-bottom:16px;">
+            <button onclick="setLang('en')" id="lang-en" style="padding:4px 10px;border-radius:4px;border:1px solid #d0d7de;background:#1a56a0;color:#fff;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">EN</button>
+            <button onclick="setLang('ru')" id="lang-ru" style="padding:4px 10px;border-radius:4px;border:1px solid #d0d7de;background:#f0f2f5;color:#57606a;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">RU</button>
+            <button onclick="setLang('kz')" id="lang-kz" style="padding:4px 10px;border-radius:4px;border:1px solid #d0d7de;background:#f0f2f5;color:#57606a;font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:700;cursor:pointer;">ҚАЗ</button>
+        </div>
+        <div class="login-logo">
+            <div class="dna-icon">🧬</div>
+            <div>
+                <h1>NBO 2026 — Bioinformatics</h1>
+                <p data-i18n="subtitle">National Biology Olympiad · Exam Portal</p>
+            </div>
+        </div>
+
+        <div class="field-label" data-i18n="label_name">Full Name</div>
+        <input type="text" id="student-name" data-i18n-ph="ph_name" placeholder="Enter your full name" autocomplete="off">
+
+        <div class="field-label" data-i18n="label_region">Region</div>
+        <select id="student-region">
+            <option value="" data-i18n="ph_region">— Select Region —</option>
+        </select>
+
+        <div class="field-label" data-i18n="label_school">School Name</div>
+        <input type="text" id="student-school" data-i18n-ph="ph_school" placeholder="Enter school name" autocomplete="off">
+
+        <button id="start-btn" onclick="startExam()" data-i18n="btn_start">BEGIN EXAM →</button>
+
+        <div class="exam-rules" data-i18n="exam_rules">
+            ⚠️ This exam is proctored and your activity is monitored. You have <strong>90 minutes</strong>. Once you submit, you cannot retake the exam.
+        </div>
+    </div>
+</div>
+
+<!-- ── EXAM INTERFACE ── -->
+<div id="exam-interface" class="hidden">
+    <header>
+        <div class="header-brand">
+            🧬 <span>NBO 2026</span> · Bioinformatics
+        </div>
+        <div id="timer-display">90:00</div>
+        <div id="user-info">
+            <span class="user-badge" id="display-name">—</span>
+            <span class="user-badge" id="display-region">—</span>
+            <button class="btn-header" onclick="openEditProfile()" title="Edit your details" style="padding:4px 9px;font-size:0.72rem;" data-i18n="btn_edit">✏ Edit</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <div style="display:flex;gap:4px;">
+                <button onclick="setLang('en')" id="hlang-en" style="padding:3px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.2);color:#fff;font-family:'DM Sans',sans-serif;font-size:0.68rem;font-weight:700;cursor:pointer;">EN</button>
+                <button onclick="setLang('ru')" id="hlang-ru" style="padding:3px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.6);font-family:'DM Sans',sans-serif;font-size:0.68rem;font-weight:700;cursor:pointer;">RU</button>
+                <button onclick="setLang('kz')" id="hlang-kz" style="padding:3px 7px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:transparent;color:rgba(255,255,255,0.6);font-family:'DM Sans',sans-serif;font-size:0.68rem;font-weight:700;cursor:pointer;">ҚАЗ</button>
+            </div>
+            <button class="btn-header" onclick="downloadAnswers()" data-i18n="btn_backup">⬇ Backup</button>
+            <button class="btn-header btn-submit" onclick="finalSubmit()" data-i18n="btn_submit">SUBMIT EXAM</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- LEFT: Questions -->
+        <section id="scenario-panel">
+            <div class="tab-bar">
+                <button class="tab-btn" onclick="showScenario(1)" data-i18n="tab1">Q1 · Viral Outbreak</button>
+                <button class="tab-btn" onclick="showScenario(2)" data-i18n="tab2">Q2 · Ancient Plants</button>
+                <button class="tab-btn" onclick="showScenario(3)" data-i18n="tab3">Q3 · Transposons</button>
+                <button class="tab-btn" onclick="showScenario(4)" data-i18n="tab4">Q4 · BRCA1 / Pedigree</button>
+            </div>
+            <div id="scenario-content"></div>
+        </section>
+
+        <!-- RIGHT: Workbench -->
+        <section id="workbench-panel">
+            <div class="tool-card">
+                <h3 data-i18n="wb_title">⚗ Bio-Workbench</h3>
+                <textarea id="seq-input" data-i18n-ph="wb_placeholder" placeholder="Paste DNA / mRNA / Protein sequences here (FASTA format)..."></textarea>
+                <div class="button-grid">
+                    <button class="btn-tool green" onclick="runTranscription()" data-i18n="wb_btn1">DNA → mRNA</button>
+                    <button class="btn-tool green" onclick="runTranslation()" data-i18n="wb_btn2">mRNA → Protein</button>
+                    <button class="btn-tool" onclick="runSimpleAlignment()" data-i18n="wb_btn3">Align (% Identity)</button>
+                    <button class="btn-tool purple" onclick="runPhyloTree()" data-i18n="wb_btn4">Build Distance Matrix</button>
+                    <button class="btn-tool wide" onclick="runDomainAnalysis()" data-i18n="wb_btn5">🔬 Protein Domain Analysis</button>
+                </div>
+            </div>
+            <div class="result-label" data-i18n="wb_output">Output</div>
+            <div class="output-container">
+                <pre id="result-display" data-i18n="wb_placeholder_out">Analysis output will appear here...</pre>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- ── EDIT PROFILE MODAL ── -->
+<div id="edit-modal" class="hidden" style="position:fixed;inset:0;background:rgba(26,42,74,0.7);z-index:2000;justify-content:center;align-items:center;">
+    <div style="background:#fff;border-radius:10px;padding:36px 32px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <h3 style="font-size:1rem;font-weight:800;color:#1a2333;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #e4e8ed;" data-i18n="edit_title">✏ Edit Your Details</h3>
+        <div class="field-label" style="color:#57606a;" data-i18n="label_name">Full Name</div>
+        <input type="text" id="edit-name" data-i18n-ph="ph_name" style="width:100%;padding:10px 12px;background:#f7f8fa;border:1px solid #d0d7de;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.92rem;color:#1c2333;outline:none;margin-bottom:4px;">
+        <div class="field-label" style="color:#57606a;" data-i18n="label_region">Region</div>
+        <select id="edit-region" style="width:100%;padding:10px 12px;background:#f7f8fa;border:1px solid #d0d7de;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.92rem;color:#1c2333;outline:none;margin-bottom:4px;"></select>
+        <div class="field-label" style="color:#57606a;" data-i18n="label_school">School Name</div>
+        <input type="text" id="edit-school" data-i18n-ph="ph_school" style="width:100%;padding:10px 12px;background:#f7f8fa;border:1px solid #d0d7de;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.92rem;color:#1c2333;outline:none;margin-bottom:20px;">
+        <div style="display:flex;gap:10px;margin-top:4px;">
+            <button onclick="saveEditProfile()" data-i18n="edit_save" style="flex:1;padding:11px;background:#1a56a0;color:#fff;border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;">Save Changes</button>
+            <button onclick="closeEditProfile()" data-i18n="edit_cancel" style="flex:1;padding:11px;background:#f7f8fa;color:#57606a;border:1px solid #d0d7de;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLiIkAPZPmC2tR34rHbrFws0ZMY_iP49Y-3MIfzBn4F2nzWuUBzuciRlEQVjU3_IknQg/exec";
+const EXAM_MINS = 90;
+
+let examData = {};
+let timerInterval = null;
+let currentLang = 'en';
+
+/* ════════════════════════════════════════════════
+   TRANSLATIONS
+════════════════════════════════════════════════ */
+const T = {
+    en: {
+        subtitle:       "National Biology Olympiad · Exam Portal",
+        label_name:     "Full Name",
+        label_region:   "Region",
+        label_school:   "School Name",
+        ph_name:        "Enter your full name",
+        ph_region:      "— Select Region —",
+        ph_school:      "Enter school name",
+        btn_start:      "BEGIN EXAM →",
+        exam_rules:     "⚠️ This exam is proctored and your activity is monitored. You have <strong>90 minutes</strong>. Once you submit, you cannot retake the exam.",
+        btn_edit:       "✏ Edit",
+        btn_backup:     "⬇ Backup",
+        btn_submit:     "SUBMIT EXAM",
+        tab1:           "Q1 · Viral Outbreak",
+        tab2:           "Q2 · Ancient Plants",
+        tab3:           "Q3 · Transposons",
+        tab4:           "Q4 · BRCA1 / Pedigree",
+        wb_title:       "⚗ Bio-Workbench",
+        wb_placeholder: "Paste DNA / mRNA / Protein sequences here (FASTA format)...",
+        wb_btn1:        "DNA → mRNA",
+        wb_btn2:        "mRNA → Protein",
+        wb_btn3:        "Align (% Identity)",
+        wb_btn4:        "Build Distance Matrix",
+        wb_btn5:        "🔬 Protein Domain Analysis",
+        wb_output:      "Output",
+        wb_placeholder_out: "Analysis output will appear here...",
+        edit_title:     "✏ Edit Your Details",
+        edit_save:      "Save Changes",
+        edit_cancel:    "Cancel",
+        // workbench output strings
+        out_transcription:  "═══ DNA → mRNA · ORF Analysis ═══",
+        out_translation:    "=== mRNA → Protein Translation ===",
+        out_no_start:       "(no start codon found)",
+        out_direct:         "Direct input:",
+        out_align:          "=== Pairwise Alignment vs.",
+        out_matches:        "Matches",
+        out_mismatches:     "Mismatches",
+        out_distance:       "=== SNP Distance Matrix ===",
+        out_distance_note:  "(Lower value = more similar / closer on tree)",
+        out_domain:         "═══ Protein Domain Analysis ═══",
+        out_domain_found:   "✔ DOMAIN IDENTIFIED",
+        out_domain_perfect: "Identity: 100% · Perfect match",
+        out_domain_prob:    "PROBABLE DOMAIN MATCH",
+        out_confidence:     "Confidence",
+        out_similarity:     "similarity",
+        out_mismatches_lbl: "MISMATCHES",
+        out_no_domain:      "✘ No matching domain found in database.",
+        out_no_orf:         "⚠ No start codon (AUG) found",
+        out_empty:          "(empty)",
+        out_empty_seq:      "Empty sequence — skipped.",
+        out_orf_complete:   "complete",
+        out_orf_open:       "no stop codon",
+        out_orf_codons:     "codons",
+        out_orf_pos:        "pos",
+        out_no_domain_db:   "⚠ Domain database is empty.",
+        out_paste_protein:  "Paste a protein sequence (FASTA or raw) into the workbench.",
+        out_no_seqs:        "Paste at least 2 FASTA sequences for alignment.",
+        out_no_seqs_tree:   "Paste at least 2 FASTA sequences.",
+        out_no_input:       "Paste a DNA or mRNA sequence in FASTA format.",
+        // submit screen
+        submit_title:       "Exam Submitted",
+        submit_msg:         "Your answers have been recorded and a backup was downloaded to your device.",
+        submit_thanks:      "Thank you,",
+        // confirm
+        confirm_submit:     "Are you sure you want to submit your exam? This cannot be undone.",
+        // alerts
+        // Question headings & descriptions
+        q1_title:       "Question 1 — Viral Protease Outbreak in Laplandia",
+        q1_intro:       "A novel viral disease has spread across towns in Laplandia. Researchers from <strong>Highgarden</strong> isolated the virus and developed an antiviral drug targeting the viral <strong>protease</strong> enzyme. You must evaluate if this drug works against strains from other towns.",
+        q1_t1_desc:     "DNA/RNA Sequence Alignment — which strains are curable? (threshold: &gt;90% similarity)",
+        q1_t1_hint:     "Use the Workbench tools on the right. Copy each town's sequence with the Highgarden reference and run <strong>Align (%)</strong>. Select all that apply:",
+        q1_t2_desc:     "Translation &amp; Protein Domain Identification — which strains are curable based on protein data?",
+        q1_t2_hint:     "Translate each mRNA sequence. Use Domain Analysis to verify the drug only targets a <strong>Protease</strong> domain. Select all curable strains:",
+        q1_mut_label:   "Indicate the mutation type present in each strain:",
+        q1_t3_desc:     "Viral Virulence Analysis — rank each strain and prioritize cure allocation",
+        q1_epi_label:   "Epidemiological data (day 0 → day 15):",
+        q1_calc_r:      "Calculate R for each strain (show to 4 decimal places):",
+        q1_priority_q:  "To which city should the cure be prioritized?",
+        q1_mc_label:    "Multiple Choice — Best explanation for varying virulence across strains:",
+        q1_mc_a:        "Mutations in viral regulatory regions increase viral replication efficiency, resulting in higher viral load.",
+        q1_mc_b:        "The viral strain evolved resistance to commonly prescribed antibiotics in the region.",
+        q1_mc_c:        "Structural mutations in viral surface proteins increase binding affinity to host cell receptors, improving viral entry.",
+        q1_mc_d:        "Reduction of viral genome size automatically increases virulence in all viruses.",
+        q1_mc_e:        "The viral strain produces chloroplast-associated proteins that interfere with human immune responses.",
+        q1_seq_header:  "Sequence Data — Question 1",
+        q1_formula_note:"R = virulence metric &nbsp;|&nbsp; N<sub>t</sub> = cases at time T &nbsp;|&nbsp; N<sub>0</sub> = initial cases &nbsp;|&nbsp; t = time (days)",
+
+        q2_title:       "Question 2 — Ancient Plant Genomics",
+        q2_intro:       "Six ancient plant species (A–F) have been sequenced. Determine their evolutionary relationships and identify their photosynthetic pathway using genomic and biochemical data.",
+        q2_t1_desc:     "Build a distance matrix from sequences, then draw an evolutionary tree.",
+        q2_t2_desc:     "Identify each plant's photosynthetic pathway based on sequence data.",
+        q2_mc_label:    "Multiple Choice Questions:",
+        q2_mc1_q:       "Which enzyme is the primary CO₂ acceptor in C4 photosynthesis?",
+        q2_mc1_a:       "RuBisCO",
+        q2_mc1_b:       "PEP Carboxylase",
+        q2_mc1_c:       "ATP Synthase",
+        q2_mc1_d:       "Phosphofructokinase",
+        q2_mc2_q:       "What is photorespiration and why is it reduced in C4 plants?",
+        q2_mc2_a:       "It is enhanced in C4 plants due to higher temperatures.",
+        q2_mc2_b:       "CO₂ is concentrated around RuBisCO in bundle sheath cells, suppressing O₂ fixation.",
+        q2_mc2_c:       "C4 plants lack RuBisCO entirely.",
+        q2_mc2_d:       "C4 plants fix CO₂ only at night.",
+        q2_mc3_q:       "Where does the Calvin cycle primarily occur in C4 plants?",
+        q2_mc3_a:       "Mesophyll cells",
+        q2_mc3_b:       "Guard cells",
+        q2_mc3_c:       "Bundle sheath cells",
+        q2_mc3_d:       "Epidermal cells",
+        q2_mc4_q:       "A mutation in the PEP carboxylase gene of a C4 plant would most likely result in:",
+        q2_mc4_a:       "Increased photorespiration and reduced efficiency in hot climates.",
+        q2_mc4_b:       "Complete loss of photosynthesis.",
+        q2_mc4_c:       "Conversion to C3 photosynthesis with no fitness cost.",
+        q2_mc4_d:       "Enhanced CO₂ fixation at low temperatures.",
+        q2_seq_header:  "Sequence Data — Question 2",
+
+        q3_title:       "Question 3 — Transposons &amp; Oncogenesis",
+        q3_intro:       "Three cancer patients have genomic insertions of transposable elements (TEs) near oncogenes or tumour suppressors. Analyse the TE type and its oncogenic effect.",
+        q3_t1_desc:     "Identify the transposable element type in each patient.",
+        q3_cancer_type: "Cancer Type",
+        q3_lung:        "Lung",
+        q3_breast:      "Breast",
+        q3_pancreatic:  "Pancreatic",
+        q3_gene:        "Gene",
+        q3_tumour_sup:  "Tumour Suppressor",
+        q3_t2_desc:     "Determine the effect on cell growth and distance to the transcription start site (TSS).",
+        q3_t3_desc:     "Calculate V-score for each cancer and rank by oncogenic risk.",
+        q3_formula_note:"Reference: LINE-1 = 1.0 &nbsp;|&nbsp; Alu = 0.6 &nbsp;|&nbsp; HERV = 0.8 &nbsp;|&nbsp; Specificity: High = 3, Med = 2, Low = 1",
+        q3_seq_header:  "Sequence Data — Question 3",
+
+        q4_title:       "Question 4 — BRCA1 Pedigree Analysis",
+        q4_intro:       "A family presents with BRCA1-associated cancer across multiple generations. Analyse the inheritance pattern, identify carriers, and calculate penetrance.",
+        q4_t1_desc:     "Draw the pedigree using the family data below.",
+        q4_fam_struct:  "Family Structure:",
+        q4_gen1:        "<strong>Gen I:</strong> I-1 ♂ (no cancer) × I-2 ♀ (cancer)",
+        q4_gen2:        "<strong>Gen II:</strong> II-1 ♀ (cancer), II-2 ♂ (no cancer), II-3 ♀ (no cancer), II-4 ♀ (cancer)",
+        q4_gen3:        "<strong>Gen III:</strong> III-1 ♀ (no cancer), III-2 ♀ (cancer) — children of II-1 &nbsp;|&nbsp; III-3 ♂ (no cancer), III-4 ♀ (no cancer) — children of II-4",
+        q4_legend:      "Legend: ■ / ● = affected &nbsp;|&nbsp; □ / ○ = unaffected &nbsp;|&nbsp; ◑ = carrier (unaffected)",
+        q4_t2_desc:     "Determine the mode of inheritance.",
+        q4_t3_desc:     "Calculate penetrance using the formula below.",
+        q4_penetrance_row: "Calculated penetrance (%)",
+        q4_seq_header:  "BRCA1 Exon 11 Sequences",
+
+        // scenario UI labels
+        s_task:         "TASK",
+        s_select:       "— Select —",
+        s_missense:     "Missense",
+        s_nonsense:     "Nonsense",
+        s_silent:       "Silent (Synonymous)",
+        s_diff_gene:    "Different gene",
+        s_strain:       "Strain",
+        s_mut_type:     "Type of Mutation",
+        s_r_value:      "R value",
+        s_rank:         "Rank (1=highest)",
+        s_population:   "Population",
+        s_day0:         "Day 0",
+        s_day15:        "Day 15",
+        s_priority_ph:  "City name and brief justification...",
+        s_param:        "Parameter",
+        s_answer:       "Your Answer",
+        s_plant:        "Plant",
+        s_pathway:      "Pathway (C3/C4)",
+        s_patient:      "Patient",
+        s_te_type:      "TE Type",
+        s_effect:       "Effect on Growth",
+        s_dist_tss:     "Distance to TSS (bp)",
+        s_cancer:       "Cancer",
+        s_vscore:       "V-Score",
+        s_inheritance:  "Mode of Inheritance",
+        s_carriers:     "List probable carriers (comma-separated):",
+        s_penetrance_ph:"e.g. 66.7%",
+        s_draw_notice:  "Draw on your physical exam paper.",
+        s_draw_pedigree:"Draw the pedigree on your physical exam paper and hand it in with your answer sheet.",
+        s_c3:           "C3",
+        s_c4:           "C4",
+        s_line1:        "LINE-1",
+        s_alu:          "Alu",
+        s_herv:         "HERV",
+        s_promotes:     "Promotes uncontrolled growth",
+        s_suppresses:   "Suppresses tumour growth",
+        s_no_effect:    "No significant effect",
+        s_ad: "Autosomal Dominant", s_ar: "Autosomal Recessive",
+        s_xd: "X-linked Dominant",  s_xr: "X-linked Recessive", s_mt: "Mitochondrial",
+    },
+    ru: {
+        subtitle:       "Национальная Олимпиада по Биологии · Портал экзамена",
+        label_name:     "Полное имя",
+        label_region:   "Регион",
+        label_school:   "Название школы",
+        ph_name:        "Введите ваше полное имя",
+        ph_region:      "— Выберите регион —",
+        ph_school:      "Введите название школы",
+        btn_start:      "НАЧАТЬ ЭКЗАМЕН →",
+        exam_rules:     "⚠️ Экзамен проходит под наблюдением. У вас есть <strong>90 минут</strong>. После отправки повторная сдача невозможна.",
+        btn_edit:       "✏ Изменить",
+        btn_backup:     "⬇ Резерв",
+        btn_submit:     "СДАТЬ ЭКЗАМЕН",
+        tab1:           "В1 · Вирусная вспышка",
+        tab2:           "В2 · Древние растения",
+        tab3:           "В3 · Транспозоны",
+        tab4:           "В4 · BRCA1 / Родословная",
+        wb_title:       "⚗ Биоинструменты",
+        wb_placeholder: "Вставьте последовательности ДНК / мРНК / Белка (формат FASTA)...",
+        wb_btn1:        "ДНК → мРНК",
+        wb_btn2:        "мРНК → Белок",
+        wb_btn3:        "Выравнивание (% сходства)",
+        wb_btn4:        "Матрица расстояний",
+        wb_btn5:        "🔬 Анализ доменов белка",
+        wb_output:      "Результат",
+        wb_placeholder_out: "Результат анализа появится здесь...",
+        edit_title:     "✏ Изменить данные",
+        edit_save:      "Сохранить",
+        edit_cancel:    "Отмена",
+        out_transcription:  "═══ ДНК → мРНК · Анализ ОРС ═══",
+        out_translation:    "=== мРНК → Белок Трансляция ===",
+        out_no_start:       "(стартовый кодон не найден)",
+        out_direct:         "Прямой ввод:",
+        out_align:          "=== Попарное выравнивание vs.",
+        out_matches:        "Совпадений",
+        out_mismatches:     "Несовпадений",
+        out_distance:       "=== Матрица расстояний SNP ===",
+        out_distance_note:  "(Меньше = более схожи / ближе на дереве)",
+        out_domain:         "═══ Анализ доменов белка ═══",
+        out_domain_found:   "✔ ДОМЕН ОПРЕДЕЛЁН",
+        out_domain_perfect: "Сходство: 100% · Точное совпадение",
+        out_domain_prob:    "ВЕРОЯТНОЕ СОВПАДЕНИЕ ДОМЕНА",
+        out_confidence:     "Достоверность",
+        out_similarity:     "сходство",
+        out_mismatches_lbl: "НЕСОВПАДЕНИЯ",
+        out_no_domain:      "✘ Совпадающий домен не найден в базе данных.",
+        out_no_orf:         "⚠ Стартовый кодон (AUG) не найден",
+        out_empty:          "(пусто)",
+        out_empty_seq:      "Пустая последовательность — пропущена.",
+        out_orf_complete:   "полная",
+        out_orf_open:       "нет стоп-кодона",
+        out_orf_codons:     "кодонов",
+        out_orf_pos:        "поз.",
+        out_no_domain_db:   "⚠ База доменов пуста.",
+        out_paste_protein:  "Вставьте белковую последовательность (FASTA или raw) в инструменты.",
+        out_no_seqs:        "Вставьте минимум 2 FASTA последовательности для выравнивания.",
+        out_no_seqs_tree:   "Вставьте минимум 2 FASTA последовательности.",
+        out_no_input:       "Вставьте ДНК или мРНК последовательность в формате FASTA.",
+        submit_title:       "Экзамен сдан",
+        submit_msg:         "Ваши ответы записаны. Резервная копия загружена на ваше устройство.",
+        submit_thanks:      "Спасибо,",
+        confirm_submit:     "Вы уверены, что хотите сдать экзамен? Это действие нельзя отменить.",
+        // Question headings & descriptions
+        q1_title:       "Вопрос 1 — Вспышка вирусной протеазы в Ляпландии",
+        q1_intro:       "Новая вирусная болезнь распространилась по городам Ляпландии. Исследователи из <strong>Хайгардена</strong> выделили вирус и разработали противовирусный препарат, направленный против вирусной <strong>протеазы</strong>. Оцените, работает ли этот препарат против штаммов из других городов.",
+        q1_t1_desc:     "Выравнивание ДНК/РНК последовательностей — какие штаммы поддаются лечению? (порог: &gt;90% сходства)",
+        q1_t1_hint:     "Используйте инструменты Bio-Workbench справа. Скопируйте последовательность каждого города с эталоном Хайгардена и запустите <strong>Выравнивание (%)</strong>. Выберите все подходящие:",
+        q1_t2_desc:     "Трансляция &amp; Идентификация белковых доменов — какие штаммы поддаются лечению на основе белковых данных?",
+        q1_t2_hint:     "Переведите каждую мРНК последовательность. Используйте анализ доменов, чтобы подтвердить, что препарат воздействует только на домен <strong>Протеазы</strong>. Выберите все поддающиеся лечению штаммы:",
+        q1_mut_label:   "Укажите тип мутации в каждом штамме:",
+        q1_t3_desc:     "Анализ вирулентности вируса — ранжируйте штаммы и расставьте приоритеты",
+        q1_epi_label:   "Эпидемиологические данные (день 0 → день 15):",
+        q1_calc_r:      "Вычислите R для каждого штамма (до 4 знаков после запятой):",
+        q1_priority_q:  "В какой город следует направить лечение в первую очередь?",
+        q1_mc_label:    "Вопрос с выбором ответа — Лучшее объяснение различий вирулентности штаммов:",
+        q1_mc_a:        "Мутации в регуляторных областях вируса повышают эффективность репликации, что приводит к более высокой вирусной нагрузке.",
+        q1_mc_b:        "Вирусный штамм приобрёл устойчивость к обычно назначаемым антибиотикам в регионе.",
+        q1_mc_c:        "Структурные мутации в поверхностных белках вируса повышают аффинность связывания с рецепторами клетки-хозяина, улучшая вход вируса.",
+        q1_mc_d:        "Уменьшение размера вирусного генома автоматически повышает вирулентность у всех вирусов.",
+        q1_mc_e:        "Вирусный штамм производит белки, связанные с хлоропластами, которые нарушают иммунные реакции человека.",
+        q1_seq_header:  "Данные последовательностей — Вопрос 1",
+        q1_formula_note:"R = показатель вирулентности &nbsp;|&nbsp; N<sub>t</sub> = случаи в момент T &nbsp;|&nbsp; N<sub>0</sub> = начальные случаи &nbsp;|&nbsp; t = время (дни)",
+
+        q2_title:       "Вопрос 2 — Геномика древних растений",
+        q2_intro:       "Шесть древних видов растений (A–F) были секвенированы. Определите их эволюционные связи и фотосинтетический путь с помощью геномных и биохимических данных.",
+        q2_t1_desc:     "Постройте матрицу расстояний на основе последовательностей, затем нарисуйте эволюционное дерево.",
+        q2_t2_desc:     "Определите фотосинтетический путь каждого растения на основе данных последовательностей.",
+        q2_mc_label:    "Вопросы с выбором ответа:",
+        q2_mc1_q:       "Какой фермент является основным акцептором CO₂ при C4 фотосинтезе?",
+        q2_mc1_a:       "РуБисКО",
+        q2_mc1_b:       "ФЕП-карбоксилаза",
+        q2_mc1_c:       "АТФ-синтаза",
+        q2_mc1_d:       "Фосфофруктокиназа",
+        q2_mc2_q:       "Что такое фотодыхание и почему оно снижено у C4 растений?",
+        q2_mc2_a:       "У C4 растений оно усилено из-за более высоких температур.",
+        q2_mc2_b:       "CO₂ концентрируется вокруг РуБисКО в клетках обкладки сосудистого пучка, подавляя фиксацию O₂.",
+        q2_mc2_c:       "У C4 растений полностью отсутствует РуБисКО.",
+        q2_mc2_d:       "C4 растения фиксируют CO₂ только ночью.",
+        q2_mc3_q:       "Где преимущественно происходит цикл Кальвина у C4 растений?",
+        q2_mc3_a:       "Клетки мезофилла",
+        q2_mc3_b:       "Замыкающие клетки",
+        q2_mc3_c:       "Клетки обкладки сосудистого пучка",
+        q2_mc3_d:       "Клетки эпидермиса",
+        q2_mc4_q:       "Мутация в гене ФЕП-карбоксилазы у C4 растения с наибольшей вероятностью приведёт к:",
+        q2_mc4_a:       "Усиленному фотодыханию и снижению эффективности в жарком климате.",
+        q2_mc4_b:       "Полной потере фотосинтеза.",
+        q2_mc4_c:       "Переходу к C3 фотосинтезу без потери приспособленности.",
+        q2_mc4_d:       "Усиленной фиксации CO₂ при низких температурах.",
+        q2_seq_header:  "Данные последовательностей — Вопрос 2",
+
+        q3_title:       "Вопрос 3 — Транспозоны &amp; Онкогенез",
+        q3_intro:       "У трёх онкологических пациентов обнаружены геномные вставки транспозируемых элементов (ТЭ) вблизи онкогенов или опухолевых супрессоров. Проанализируйте тип ТЭ и его онкогенный эффект.",
+        q3_t1_desc:     "Определите тип транспозируемого элемента у каждого пациента.",
+        q3_cancer_type: "Тип рака",
+        q3_lung:        "Лёгкое",
+        q3_breast:      "Молочная железа",
+        q3_pancreatic:  "Поджелудочная железа",
+        q3_gene:        "Ген",
+        q3_tumour_sup:  "Опухолевый супрессор",
+        q3_t2_desc:     "Определите влияние на рост клеток и расстояние до сайта начала транскрипции (TSS).",
+        q3_t3_desc:     "Вычислите V-оценку для каждого типа рака и ранжируйте по онкогенному риску.",
+        q3_formula_note:"Справочник: LINE-1 = 1.0 &nbsp;|&nbsp; Alu = 0.6 &nbsp;|&nbsp; HERV = 0.8 &nbsp;|&nbsp; Специфичность: Высокая = 3, Средняя = 2, Низкая = 1",
+        q3_seq_header:  "Данные последовательностей — Вопрос 3",
+
+        q4_title:       "Вопрос 4 — Анализ родословной BRCA1",
+        q4_intro:       "В семье наблюдается BRCA1-ассоциированный рак в нескольких поколениях. Проанализируйте тип наследования, определите носителей и рассчитайте пенетрантность.",
+        q4_t1_desc:     "Нарисуйте родословную на основе данных семьи.",
+        q4_fam_struct:  "Структура семьи:",
+        q4_gen1:        "<strong>Поколение I:</strong> I-1 ♂ (без рака) × I-2 ♀ (рак)",
+        q4_gen2:        "<strong>Поколение II:</strong> II-1 ♀ (рак), II-2 ♂ (без рака), II-3 ♀ (без рака), II-4 ♀ (рак)",
+        q4_gen3:        "<strong>Поколение III:</strong> III-1 ♀ (без рака), III-2 ♀ (рак) — дети II-1 &nbsp;|&nbsp; III-3 ♂ (без рака), III-4 ♀ (без рака) — дети II-4",
+        q4_legend:      "Обозначения: ■ / ● = поражённые &nbsp;|&nbsp; □ / ○ = здоровые &nbsp;|&nbsp; ◑ = носитель (здоровый)",
+        q4_t2_desc:     "Определите тип наследования.",
+        q4_t3_desc:     "Рассчитайте пенетрантность по формуле ниже.",
+        q4_penetrance_row: "Вычисленная пенетрантность (%)",
+        q4_seq_header:  "Последовательности экзона 11 BRCA1",
+
+        // scenario UI labels
+        s_task:         "ЗАДАНИЕ",
+        s_select:       "— Выбрать —",
+        s_missense:     "Миссенс",
+        s_nonsense:     "Нонсенс",
+        s_silent:       "Тихая (синонимичная)",
+        s_diff_gene:    "Другой ген",
+        s_strain:       "Штамм",
+        s_mut_type:     "Тип мутации",
+        s_r_value:      "Значение R",
+        s_rank:         "Ранг (1=наивысший)",
+        s_population:   "Население",
+        s_day0:         "День 0",
+        s_day15:        "День 15",
+        s_priority_ph:  "Название города и обоснование...",
+        s_param:        "Параметр",
+        s_answer:       "Ваш ответ",
+        s_plant:        "Растение",
+        s_pathway:      "Путь (C3/C4)",
+        s_patient:      "Пациент",
+        s_te_type:      "Тип ТЭ",
+        s_effect:       "Влияние на рост",
+        s_dist_tss:     "Расстояние до TSS (пн)",
+        s_cancer:       "Рак",
+        s_vscore:       "V-оценка",
+        s_inheritance:  "Тип наследования",
+        s_carriers:     "Список вероятных носителей (через запятую):",
+        s_penetrance_ph:"напр. 66.7%",
+        s_draw_notice:  "Нарисуйте на бумажном экзаменационном листе.",
+        s_draw_pedigree:"Нарисуйте родословную на бумажном экзаменационном листе и сдайте вместе с ответами.",
+        s_c3:           "C3",
+        s_c4:           "C4",
+        s_line1:        "LINE-1",
+        s_alu:          "Alu",
+        s_herv:         "HERV",
+        s_promotes:     "Способствует неконтролируемому росту",
+        s_suppresses:   "Подавляет рост опухоли",
+        s_no_effect:    "Нет значимого эффекта",
+        s_ad: "Аутосомно-доминантный", s_ar: "Аутосомно-рецессивный",
+        s_xd: "X-сцепленный доминантный", s_xr: "X-сцепленный рецессивный", s_mt: "Митохондриальный",
+    },
+    kz: {
+        subtitle:       "Ұлттық Биология Олимпиадасы · Емтихан порталы",
+        label_name:     "Толық аты-жөні",
+        label_region:   "Өңір",
+        label_school:   "Мектеп атауы",
+        ph_name:        "Толық аты-жөніңізді енгізіңіз",
+        ph_region:      "— Өңірді таңдаңыз —",
+        ph_school:      "Мектеп атауын енгізіңіз",
+        btn_start:      "ЕМТИХАНДЫ БАСТАУ →",
+        exam_rules:     "⚠️ Емтихан бақылауда өтеді. Сізде <strong>90 минут</strong> бар. Тапсырғаннан кейін қайта тапсыру мүмкін емес.",
+        btn_edit:       "✏ Өзгерту",
+        btn_backup:     "⬇ Сақтық",
+        btn_submit:     "ЕМТИХАНДЫ ТАПСЫРУ",
+        tab1:           "С1 · Вирустық індет",
+        tab2:           "С2 · Ежелгі өсімдіктер",
+        tab3:           "С3 · Транспозондар",
+        tab4:           "С4 · BRCA1 / Шежіре",
+        wb_title:       "⚗ Биоқұралдар",
+        wb_placeholder: "ДНҚ / мРНҚ / Ақуыз тізбектерін осында қойыңыз (FASTA форматы)...",
+        wb_btn1:        "ДНҚ → мРНҚ",
+        wb_btn2:        "мРНҚ → Ақуыз",
+        wb_btn3:        "Туралау (% ұқсастық)",
+        wb_btn4:        "Қашықтық матрицасы",
+        wb_btn5:        "🔬 Ақуыз домендерін талдау",
+        wb_output:      "Нәтиже",
+        wb_placeholder_out: "Талдау нәтижесі осында пайда болады...",
+        edit_title:     "✏ Деректерді өзгерту",
+        edit_save:      "Сақтау",
+        edit_cancel:    "Бас тарту",
+        out_transcription:  "═══ ДНҚ → мРНҚ · ОРА Талдауы ═══",
+        out_translation:    "=== мРНҚ → Ақуыз Трансляция ===",
+        out_no_start:       "(старт кодоны табылмады)",
+        out_direct:         "Тікелей енгізу:",
+        out_align:          "=== Жұптық туралау vs.",
+        out_matches:        "Сәйкестіктер",
+        out_mismatches:     "Сәйкессіздіктер",
+        out_distance:       "=== SNP Қашықтық матрицасы ===",
+        out_distance_note:  "(Аз мән = көбірек ұқсас / ағашта жақын)",
+        out_domain:         "═══ Ақуыз Домендерін Талдау ═══",
+        out_domain_found:   "✔ ДОМЕН АНЫҚТАЛДЫ",
+        out_domain_perfect: "Ұқсастық: 100% · Дәл сәйкестік",
+        out_domain_prob:    "ЫҚТИМАЛ ДОМЕН СӘЙКЕСТІГІ",
+        out_confidence:     "Сенімділік",
+        out_similarity:     "ұқсастық",
+        out_mismatches_lbl: "СӘЙКЕССІЗДІКТЕР",
+        out_no_domain:      "✘ Деректер базасында сәйкес домен табылмады.",
+        out_no_orf:         "⚠ Старт кодоны (AUG) табылмады",
+        out_empty:          "(бос)",
+        out_empty_seq:      "Бос тізбек — өткізіп жіберілді.",
+        out_orf_complete:   "толық",
+        out_orf_open:       "стоп кодоны жоқ",
+        out_orf_codons:     "кодон",
+        out_orf_pos:        "қал.",
+        out_no_domain_db:   "⚠ Домен базасы бос.",
+        out_paste_protein:  "Ақуыз тізбегін (FASTA немесе raw) құралдарға қойыңыз.",
+        out_no_seqs:        "Туралау үшін кемінде 2 FASTA тізбегін қойыңыз.",
+        out_no_seqs_tree:   "Кемінде 2 FASTA тізбегін қойыңыз.",
+        out_no_input:       "FASTA форматында ДНҚ немесе мРНҚ тізбегін қойыңыз.",
+        submit_title:       "Емтихан тапсырылды",
+        submit_msg:         "Жауаптарыңыз тіркелді. Сақтық көшірме құрылғыңызға жүктелді.",
+        submit_thanks:      "Рахмет,",
+        confirm_submit:     "Емтиханды тапсырғыңыз келетініне сенімдісіз бе? Бұл әрекетті болдырмауға болмайды.",
+        // Question headings & descriptions
+        q1_title:       "1-сұрақ — Ляпландиядағы вирустық протеазаның індеті",
+        q1_intro:       "Ляпландия қалаларына жаңа вирустық ауру таралды. <strong>Хайгарден</strong> қаласының зерттеушілері вирусты бөліп алып, вирустық <strong>протеазаға</strong> бағытталған антивирустық препарат жасады. Препараттың басқа қалалардың штаммдарына әсер ететінін бағалаңыз.",
+        q1_t1_desc:     "ДНҚ/РНҚ тізбегін туралау — қандай штаммдар емделуі мүмкін? (шек: &gt;90% ұқсастық)",
+        q1_t1_hint:     "Оң жақтағы Bio-Workbench құралдарын пайдаланыңыз. Әр қаланың тізбегін Хайгарден эталонымен бірге көшіріп, <strong>Туралау (%)</strong> іске қосыңыз. Барлық сәйкестерді таңдаңыз:",
+        q1_t2_desc:     "Трансляция &amp; Ақуыз доменін анықтау — ақуыз деректері бойынша қандай штаммдар емделуі мүмкін?",
+        q1_t2_hint:     "Әр мРНҚ тізбегін аударыңыз. Препарат тек <strong>Протеаза</strong> доменіне әсер ететінін домен талдауы арқылы тексеріңіз. Емделетін барлық штаммдарды таңдаңыз:",
+        q1_mut_label:   "Әр штаммдағы мутация түрін көрсетіңіз:",
+        q1_t3_desc:     "Вирустың вирулентілігін талдау — штаммдарды рейтингке қосыңыз және емдеуге басымдық беріңіз",
+        q1_epi_label:   "Эпидемиологиялық деректер (0-күн → 15-күн):",
+        q1_calc_r:      "Әр штамм үшін R мәнін есептеңіз (4 ондық таңбаға дейін):",
+        q1_priority_q:  "Емдеуді қай қалаға бірінші кезекте жіберу керек?",
+        q1_mc_label:    "Тест сұрағы — Штаммдар арасындағы вирулентілік айырмашылығының үздік түсіндірмесі:",
+        q1_mc_a:        "Вирустың реттеуші аймақтарындағы мутациялар репликация тиімділігін арттырып, вирустық жүктемені жоғарылатады.",
+        q1_mc_b:        "Вирустық штамм аймақта жиі тағайындалатын антибиотиктерге төзімділік қалыптастырды.",
+        q1_mc_c:        "Вирустың беттік ақуыздарындағы құрылымдық мутациялар хозяин жасушасының рецепторларымен байланысу аффинділігін арттырып, вирустың кіруін жеңілдетеді.",
+        q1_mc_d:        "Вирустық геном өлшемінің қысқаруы барлық вирустарда вирулентілікті автоматты түрде арттырады.",
+        q1_mc_e:        "Вирустық штамм адамның иммундық жауабына кедергі келтіретін хлоропластпен байланысты ақуыздар шығарады.",
+        q1_seq_header:  "Тізбек деректері — 1-сұрақ",
+        q1_formula_note:"R = вирулентілік көрсеткіші &nbsp;|&nbsp; N<sub>t</sub> = T уақытындағы жағдайлар &nbsp;|&nbsp; N<sub>0</sub> = бастапқы жағдайлар &nbsp;|&nbsp; t = уақыт (күндер)",
+
+        q2_title:       "2-сұрақ — Ежелгі өсімдіктердің геномикасы",
+        q2_intro:       "Алты ежелгі өсімдік түрінің (A–F) тізбегі анықталды. Геномдық және биохимиялық деректер арқылы олардың эволюциялық байланысын және фотосинтез жолын анықтаңыз.",
+        q2_t1_desc:     "Тізбектер бойынша қашықтық матрицасын құрыңыз, содан кейін эволюциялық ағаш салыңыз.",
+        q2_t2_desc:     "Тізбек деректері негізінде әр өсімдіктің фотосинтез жолын анықтаңыз.",
+        q2_mc_label:    "Тест сұрақтары:",
+        q2_mc1_q:       "C4 фотосинтезінде CO₂-нің негізгі акцепторы қандай фермент?",
+        q2_mc1_a:       "РуБисКО",
+        q2_mc1_b:       "ФЕП-карбоксилаза",
+        q2_mc1_c:       "АТФ-синтаза",
+        q2_mc1_d:       "Фосфофруктокиназа",
+        q2_mc2_q:       "Фотодыхание дегеніміз не және ол C4 өсімдіктерінде неліктен азаяды?",
+        q2_mc2_a:       "Жоғары температура себебінен C4 өсімдіктерінде күшейеді.",
+        q2_mc2_b:       "CO₂ тамыр қабы жасушаларындағы РуБисКО айналасына шоғырланып, O₂ фиксациясын басады.",
+        q2_mc2_c:       "C4 өсімдіктерінде РуБисКО мүлдем жоқ.",
+        q2_mc2_d:       "C4 өсімдіктері CO₂-ні тек түнде фиксациялайды.",
+        q2_mc3_q:       "C4 өсімдіктерінде Кальвин циклі негізінен қайда жүреді?",
+        q2_mc3_a:       "Мезофилл жасушалары",
+        q2_mc3_b:       "Қорғаушы жасушалар",
+        q2_mc3_c:       "Тамыр қабының жасушалары",
+        q2_mc3_d:       "Эпидермис жасушалары",
+        q2_mc4_q:       "C4 өсімдігінің ФЕП-карбоксилаза геніндегі мутация ең ықтимал нәтиже:",
+        q2_mc4_a:       "Фотодыхананың күшеюі және ыстық климаттағы тиімділіктің төмендеуі.",
+        q2_mc4_b:       "Фотосинтездің толық жоғалуы.",
+        q2_mc4_c:       "Бейімделу шығынсыз C3 фотосинтезіне өту.",
+        q2_mc4_d:       "Төмен температурада CO₂ фиксациясының күшеюі.",
+        q2_seq_header:  "Тізбек деректері — 2-сұрақ",
+
+        q3_title:       "3-сұрақ — Транспозондар &amp; Онкогенез",
+        q3_intro:       "Үш онкологиялық пациентте онкогендер немесе ісік супрессорларының жанында транспозициялық элементтердің (ТЭ) геномдық енгізілуі анықталды. ТЭ түрін және оның онкогендік әсерін талдаңыз.",
+        q3_t1_desc:     "Әр пациенттегі транспозициялық элемент түрін анықтаңыз.",
+        q3_cancer_type: "Қатерлі ісік түрі",
+        q3_lung:        "Өкпе",
+        q3_breast:      "Сүт безі",
+        q3_pancreatic:  "Ұйқы безі",
+        q3_gene:        "Ген",
+        q3_tumour_sup:  "Ісік супрессоры",
+        q3_t2_desc:     "Жасуша өсуіне әсерін және транскрипцияның басталу нүктесіне (TSS) дейінгі қашықтықты анықтаңыз.",
+        q3_t3_desc:     "Әр қатерлі ісік үшін V-балл есептеп, онкогендік қауіп бойынша рейтинг жасаңыз.",
+        q3_formula_note:"Анықтамалық: LINE-1 = 1.0 &nbsp;|&nbsp; Alu = 0.6 &nbsp;|&nbsp; HERV = 0.8 &nbsp;|&nbsp; Ерекшелік: Жоғары = 3, Орта = 2, Төмен = 1",
+        q3_seq_header:  "Тізбек деректері — 3-сұрақ",
+
+        q4_title:       "4-сұрақ — BRCA1 Шежіресін Талдау",
+        q4_intro:       "Отбасының бірнеше ұрпағында BRCA1-байланысты қатерлі ісік байқалады. Мұра түрін талдаңыз, тасымалдаушыларды анықтаңыз және пенетрантылықты есептеңіз.",
+        q4_t1_desc:     "Отбасы деректері негізінде шежіре салыңыз.",
+        q4_fam_struct:  "Отбасы құрылымы:",
+        q4_gen1:        "<strong>I Ұрпақ:</strong> I-1 ♂ (қатерлі ісік жоқ) × I-2 ♀ (қатерлі ісік)",
+        q4_gen2:        "<strong>II Ұрпақ:</strong> II-1 ♀ (қатерлі ісік), II-2 ♂ (жоқ), II-3 ♀ (жоқ), II-4 ♀ (қатерлі ісік)",
+        q4_gen3:        "<strong>III Ұрпақ:</strong> III-1 ♀ (жоқ), III-2 ♀ (қатерлі ісік) — II-1 балалары &nbsp;|&nbsp; III-3 ♂ (жоқ), III-4 ♀ (жоқ) — II-4 балалары",
+        q4_legend:      "Белгілер: ■ / ● = ауру &nbsp;|&nbsp; □ / ○ = сау &nbsp;|&nbsp; ◑ = тасымалдаушы (сау)",
+        q4_t2_desc:     "Мұра түрін анықтаңыз.",
+        q4_t3_desc:     "Төмендегі формула бойынша пенетрантылықты есептеңіз.",
+        q4_penetrance_row: "Есептелген пенетрантылық (%)",
+        q4_seq_header:  "BRCA1 11-экзон тізбектері",
+
+        // scenario UI labels
+        s_task:         "ТАПСЫРМА",
+        s_select:       "— Таңдаңыз —",
+        s_missense:     "Миссенс",
+        s_nonsense:     "Нонсенс",
+        s_silent:       "Тыныш (синонимді)",
+        s_diff_gene:    "Басқа ген",
+        s_strain:       "Штамм",
+        s_mut_type:     "Мутация түрі",
+        s_r_value:      "R мәні",
+        s_rank:         "Рейтинг (1=жоғары)",
+        s_population:   "Халық",
+        s_day0:         "0-күн",
+        s_day15:        "15-күн",
+        s_priority_ph:  "Қала атауы және негіздеме...",
+        s_param:        "Параметр",
+        s_answer:       "Сіздің жауабыңыз",
+        s_plant:        "Өсімдік",
+        s_pathway:      "Жол (C3/C4)",
+        s_patient:      "Пациент",
+        s_te_type:      "ТЭ түрі",
+        s_effect:       "Өсуге әсері",
+        s_dist_tss:     "TSS-ке қашықтық (нп)",
+        s_cancer:       "Қатерлі ісік",
+        s_vscore:       "V-балл",
+        s_inheritance:  "Мұра түрі",
+        s_carriers:     "Ықтимал тасымалдаушылар (үтірмен бөлінген):",
+        s_penetrance_ph:"мыс. 66.7%",
+        s_draw_notice:  "Қағаз емтихан парақшасына салыңыз.",
+        s_draw_pedigree:"Шежірені қағаз парақшасына салып, жауап парақшасымен бірге тапсырыңыз.",
+        s_c3:           "C3",
+        s_c4:           "C4",
+        s_line1:        "LINE-1",
+        s_alu:          "Alu",
+        s_herv:         "HERV",
+        s_promotes:     "Бақылаусыз өсуге ықпал етеді",
+        s_suppresses:   "Ісік өсуін басады",
+        s_no_effect:    "Маңызды әсер жоқ",
+        s_ad: "Аутосомды-доминантты", s_ar: "Аутосомды-рецессивті",
+        s_xd: "X-байланысты доминантты", s_xr: "X-байланысты рецессивті", s_mt: "Митохондриялық",
+    }
+};
+
+function t(key) { return (T[currentLang] && T[currentLang][key]) || T.en[key] || key; }
+
+function setLang(lang) {
+    currentLang = lang;
+    // Update login lang buttons
+    ['en','ru','kz'].forEach(l => {
+        const b = document.getElementById('lang-' + l);
+        const hb = document.getElementById('hlang-' + l);
+        const active = l === lang;
+        if (b)  { b.style.background  = active ? '#1a56a0' : '#f0f2f5'; b.style.color  = active ? '#fff' : '#57606a'; b.style.borderColor = active ? '#1a56a0' : '#d0d7de'; }
+        if (hb) { hb.style.background = active ? 'rgba(255,255,255,0.25)' : 'transparent'; hb.style.color = active ? '#fff' : 'rgba(255,255,255,0.5)'; hb.style.borderColor = active ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.15)'; }
+    });
+    applyLang();
+    // Re-render current scenario if exam is active
+    const active = document.querySelector('.tab-btn.active');
+    if (active) {
+        const idx = [...document.querySelectorAll('.tab-btn')].indexOf(active) + 1;
+        if (idx > 0) showScenario(idx);
+    }
+}
+
+function applyLang() {
+    // Static text nodes
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        el.innerHTML = t(key);
+    });
+    // Placeholders
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+        const key = el.getAttribute('data-i18n-ph');
+        el.placeholder = t(key);
+    });
+    // Region first option
+    const regionSel = document.getElementById('student-region');
+    if (regionSel && regionSel.options[0]) regionSel.options[0].textContent = t('ph_region');
+    // Result display placeholder if untouched
+    const rd = document.getElementById('result-display');
+    if (rd && rd.getAttribute('data-pristine') !== 'false') rd.textContent = t('wb_placeholder_out');
+}
+
+
+const regions = ["Abai","Akmola","Aktobe","Almaty","Atyrau","East Kazakhstan","Jetisu","Karaganda","Kostanay","Kyzylorda","Mangystau","North Kazakhstan","Pavlodar","Turkistan","Ulytau","West Kazakhstan","Zhambyl"];
+
+function saveAns(k, v) { examData[k] = v; }
+function saveCheck(k, v) {
+    if (!examData[k]) examData[k] = [];
+    let i = examData[k].indexOf(v);
+    if (i > -1) examData[k].splice(i, 1); else examData[k].push(v);
+}
+
+/* ════════════════════════════════════════════════
+   SCENARIO CONTENT
+════════════════════════════════════════════════ */
+// Helper: mutation type select
+function mutSel(key) {
+    return `<select onchange="saveAns('${key}',this.value)">
+        <option value="">${t('s_select')}</option>
+        <option>${t('s_missense')}</option>
+        <option>${t('s_nonsense')}</option>
+        <option>${t('s_silent')}</option>
+        <option>${t('s_diff_gene')}</option>
+    </select>`;
+}
+function c3c4Sel(key) {
+    return `<select onchange="saveAns('${key}',this.value)">
+        <option value="">${t('s_select')}</option>
+        <option>${t('s_c3')}</option>
+        <option>${t('s_c4')}</option>
+    </select>`;
+}
+function teSel(key) {
+    return `<select onchange="saveAns('${key}',this.value)">
+        <option value="">${t('s_select')}</option>
+        <option>${t('s_line1')}</option>
+        <option>${t('s_alu')}</option>
+        <option>${t('s_herv')}</option>
+    </select>`;
+}
+function effectSel(key) {
+    return `<select onchange="saveAns('${key}',this.value)">
+        <option value="">${t('s_select')}</option>
+        <option>${t('s_promotes')}</option>
+        <option>${t('s_suppresses')}</option>
+        <option>${t('s_no_effect')}</option>
+    </select>`;
+}
+
+function showScenario(num) {
+    const content = document.getElementById('scenario-content');
+    document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i+1) === num));
+
+    if (num === 1) content.innerHTML = `
+<h2>${t('q1_title')}</h2>
+<div class="info-box">${t('q1_intro')}</div>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 1</span>
+  <p>${t('q1_t1_desc')}</p>
+</div>
+<p style="font-size:0.8rem;color:var(--text2)">${t('q1_t1_hint')}</p>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Winterfell')"> A. Winterfell</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Dorne')"> B. Dorne</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Gulltown')"> C. Gulltown</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Braavos')"> D. Braavos</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t1','Volantis')"> E. Volantis</label>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 2</span>
+  <p>${t('q1_t2_desc')}</p>
+</div>
+<p style="font-size:0.8rem;color:var(--text2)">${t('q1_t2_hint')}</p>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Winterfell')"> A. Winterfell</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Dorne')"> B. Dorne</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Gulltown')"> C. Gulltown</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Braavos')"> D. Braavos</label>
+<label class="mc-option"><input type="checkbox" onchange="saveCheck('q1t2_curable','Volantis')"> E. Volantis</label>
+
+<p style="margin-top:16px;"><strong>${t('q1_mut_label')}</strong></p>
+<table>
+  <tr><th>${t('s_strain')}</th><th>${t('s_mut_type')}</th></tr>
+  <tr><td>Winterfell</td><td>${mutSel('q1_mut_winterfell')}</td></tr>
+  <tr><td>Dorne</td><td>${mutSel('q1_mut_dorne')}</td></tr>
+  <tr><td>Gulltown</td><td>${mutSel('q1_mut_gulltown')}</td></tr>
+  <tr><td>Braavos</td><td>${mutSel('q1_mut_braavos')}</td></tr>
+  <tr><td>Volantis</td><td>${mutSel('q1_mut_volantis')}</td></tr>
+</table>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 3</span>
+  <p>${t('q1_t3_desc')}</p>
+</div>
+<div class="formula-box">
+  \\[ R = \\frac{\\ln(N_t) - \\ln(N_0)}{t} \\]
+  <div style="font-size:0.78rem;color:var(--text2);margin-top:6px;">${t('q1_formula_note')}</div>
+</div>
+
+<div class="info-box" style="font-size:0.8rem;">
+  <strong>${t('q1_epi_label')}</strong><br><br>
+  <table>
+    <tr><th>${t('s_strain')}</th><th>${t('s_population')}</th><th>${t('s_day0')}</th><th>${t('s_day15')}</th></tr>
+    <tr><td>Winterfell</td><td>6,830,530</td><td>125,650</td><td>890</td></tr>
+    <tr><td>Highgarden</td><td>25,000</td><td>5,600</td><td>12,350</td></tr>
+    <tr><td>Dorne</td><td>3,500,000</td><td>8,654</td><td>157,572</td></tr>
+    <tr><td>Gulltown</td><td>43,680</td><td>103</td><td>10,564</td></tr>
+    <tr><td>Braavos</td><td>18,000</td><td>200</td><td>9,800</td></tr>
+    <tr><td>Volantis</td><td>850,000</td><td>65</td><td>9,756</td></tr>
+  </table>
+</div>
+
+<p><strong>${t('q1_calc_r')}</strong></p>
+<table>
+  <tr><th>${t('s_strain')}</th><th>${t('s_r_value')}</th><th>${t('s_rank')}</th></tr>
+  <tr><td>Highgarden</td><td><input type="text" onchange="saveAns('q1_r_highgarden',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_highgarden',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Winterfell</td><td><input type="text" onchange="saveAns('q1_r_winterfell',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_winterfell',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Dorne</td><td><input type="text" onchange="saveAns('q1_r_dorne',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_dorne',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Gulltown</td><td><input type="text" onchange="saveAns('q1_r_gulltown',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_gulltown',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Braavos</td><td><input type="text" onchange="saveAns('q1_r_braavos',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_braavos',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>Volantis</td><td><input type="text" onchange="saveAns('q1_r_volantis',this.value)"></td><td><input type="text" onchange="saveAns('q1_rank_volantis',this.value)" style="width:60px;text-align:center;"></td></tr>
+</table>
+
+<p><strong>${t('q1_priority_q')}</strong></p>
+<input class="answer-input" type="text" placeholder="${t('s_priority_ph')}" onchange="saveAns('q1_priority',this.value)">
+
+<p><strong>${t('q1_mc_label')}</strong></p>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','A')"> A. ${t('q1_mc_a')}</label>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','B')"> B. ${t('q1_mc_b')}</label>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','C')"> C. ${t('q1_mc_c')}</label>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','D')"> D. ${t('q1_mc_d')}</label>
+<label class="mc-option"><input type="radio" name="q1mc" onchange="saveAns('q1_mc','E')"> E. ${t('q1_mc_e')}</label>
+
+<hr class="section-divider">
+<h3>${t('q1_seq_header')}</h3>
+<div class="dataset-box"><span class="seq-header">>Highgarden_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUUGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Winterfell_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGAUGACUACGACGAUGACGUUGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Dorne_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGAUGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUCGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Gulltown_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUUGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Braavos_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUUGACGACUACGAUCGACGUUGACGACCUGA
+
+<span class="seq-header">>Volantis_mRNA</span>
+AUGGCUUACGACUACGAUGACGAUGACGUUGACCUGAUCGACGUUGACGACUACGACGUUGACGACCUGAUCGACGUUGACGACUACGACGAUGACGUUGACGACUACGAUCGACGUUGACGACCUGA</div>`;
+
+    else if (num === 2) content.innerHTML = `
+<h2>${t('q2_title')}</h2>
+<div class="info-box">${t('q2_intro')}</div>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 1</span>
+  <p>${t('q2_t1_desc')}</p>
+</div>
+<div class="warning-box">📝 ${t('s_draw_notice')}</div>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 2</span>
+  <p>${t('q2_t2_desc')}</p>
+</div>
+<table>
+  <tr><th>${t('s_plant')}</th><th>${t('s_pathway')}</th></tr>
+  <tr><td>Plant A</td><td>${c3c4Sel('q2_pathway_a')}</td></tr>
+  <tr><td>Plant B</td><td>${c3c4Sel('q2_pathway_b')}</td></tr>
+  <tr><td>Plant C</td><td>${c3c4Sel('q2_pathway_c')}</td></tr>
+  <tr><td>Plant D</td><td>${c3c4Sel('q2_pathway_d')}</td></tr>
+  <tr><td>Plant E</td><td>${c3c4Sel('q2_pathway_e')}</td></tr>
+  <tr><td>Plant F</td><td>${c3c4Sel('q2_pathway_f')}</td></tr>
+</table>
+
+<p style="margin-top:18px;"><strong>${t('q2_mc_label')}</strong></p>
+<p><strong>Q2.1</strong> ${t('q2_mc1_q')}</p>
+<label class="mc-option"><input type="radio" name="q2mc1" onchange="saveAns('q2mc1','A')"> A. ${t('q2_mc1_a')}</label>
+<label class="mc-option"><input type="radio" name="q2mc1" onchange="saveAns('q2mc1','B')"> B. ${t('q2_mc1_b')}</label>
+<label class="mc-option"><input type="radio" name="q2mc1" onchange="saveAns('q2mc1','C')"> C. ${t('q2_mc1_c')}</label>
+<label class="mc-option"><input type="radio" name="q2mc1" onchange="saveAns('q2mc1','D')"> D. ${t('q2_mc1_d')}</label>
+
+<p><strong>Q2.2</strong> ${t('q2_mc2_q')}</p>
+<label class="mc-option"><input type="radio" name="q2mc2" onchange="saveAns('q2mc2','A')"> A. ${t('q2_mc2_a')}</label>
+<label class="mc-option"><input type="radio" name="q2mc2" onchange="saveAns('q2mc2','B')"> B. ${t('q2_mc2_b')}</label>
+<label class="mc-option"><input type="radio" name="q2mc2" onchange="saveAns('q2mc2','C')"> C. ${t('q2_mc2_c')}</label>
+<label class="mc-option"><input type="radio" name="q2mc2" onchange="saveAns('q2mc2','D')"> D. ${t('q2_mc2_d')}</label>
+
+<p><strong>Q2.3</strong> ${t('q2_mc3_q')}</p>
+<label class="mc-option"><input type="radio" name="q2mc3" onchange="saveAns('q2mc3','A')"> A. ${t('q2_mc3_a')}</label>
+<label class="mc-option"><input type="radio" name="q2mc3" onchange="saveAns('q2mc3','B')"> B. ${t('q2_mc3_b')}</label>
+<label class="mc-option"><input type="radio" name="q2mc3" onchange="saveAns('q2mc3','C')"> C. ${t('q2_mc3_c')}</label>
+<label class="mc-option"><input type="radio" name="q2mc3" onchange="saveAns('q2mc3','D')"> D. ${t('q2_mc3_d')}</label>
+
+<p><strong>Q2.4</strong> ${t('q2_mc4_q')}</p>
+<label class="mc-option"><input type="radio" name="q2mc4" onchange="saveAns('q2mc4','A')"> A. ${t('q2_mc4_a')}</label>
+<label class="mc-option"><input type="radio" name="q2mc4" onchange="saveAns('q2mc4','B')"> B. ${t('q2_mc4_b')}</label>
+<label class="mc-option"><input type="radio" name="q2mc4" onchange="saveAns('q2mc4','C')"> C. ${t('q2_mc4_c')}</label>
+<label class="mc-option"><input type="radio" name="q2mc4" onchange="saveAns('q2mc4','D')"> D. ${t('q2_mc4_d')}</label>
+
+<hr class="section-divider">
+<h3>${t('q2_seq_header')}</h3>
+<div class="dataset-box"><span class="seq-header">>Plant_A</span>
+ATGCGTCTGCGTAGCAGCATCAGCGCAGCTGCTGGGCTGCCCAAAGCTAAATCCACGGGCATCGTCAGCGGTAAACTGCGCTCTGCTGCACCCAACAAAGTTGAGTATGACTATGTTGTACCTGCTGATGAAGAT
+
+<span class="seq-header">>Plant_B</span>
+ATGCGTCTGCGTAGCAGCATCAGCGCAGCTGCTGGGCTGCCCAAAGCTAAATCCACGGGCATCGTCAGCGGTAAACTGCGCTCTGCTGCACCCAACAAAGTTGAGTATGACTATGTTGTACCTGCTGATGAAGAT
+
+<span class="seq-header">>Plant_C</span>
+ATGCGTCTGCGTAGCAGCATCAGCGCAGCTGCTGGGCTGCCCAAAGCTAAATCCACGGGCATCGTCAGCGGTAAACTGCGCTCTGCTGCACCCAACAAAGTTGAGTATGACTATGTTGTACCTGCTGATGAAGAC
+
+<span class="seq-header">>Plant_D</span>
+ATGCGTCTGCGTAGCAGCATCAGCGCAGCTGCTGGGCTGCCCAAAGCTAAATCCACGGGCATCGTCAGCGGTAAACTGCGCTCTGCTGCACCCAACAAAGTTGAGTATGACTATGTTGTACCTGCTGATGAAGAC
+
+<span class="seq-header">>Plant_E</span>
+ATGCGTCTGCGTAGCAGCATCAGCGCAGCTGCTGGGCTGCCCAAAGCTAAATCCACGGGCATCGTCAGCGGTAAACTGCGCTCTGCTGCACCCAACAAAGTTGAGTATGACTATGTTGTACCTGCTGATGAAGAG
+
+<span class="seq-header">>Plant_F</span>
+ATGCGTCTGCGTAGCAGCATCAGCGCAGCTGGGCTGCCCAAAGCTAAATCCACGGGCATCGTCAGCGGTAAACTGCGCTCTGCTGCACCCAACAAAGTTGAGTATGACTATGTTGTACCTGCTGATGAAGAG</div>`;
+
+    else if (num === 3) content.innerHTML = `
+<h2>${t('q3_title')}</h2>
+<div class="info-box">${t('q3_intro')}</div>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 1</span>
+  <p>${t('q3_t1_desc')}</p>
+</div>
+<table>
+  <tr><th>${t('s_patient')}</th><th>${t('q3_cancer_type')}</th><th>${t('s_te_type')}</th></tr>
+  <tr><td>Patient 1</td><td>${t('q3_lung')}</td><td>${teSel('q3_te_1')}</td></tr>
+  <tr><td>Patient 2</td><td>${t('q3_breast')}</td><td>${teSel('q3_te_2')}</td></tr>
+  <tr><td>Patient 3</td><td>${t('q3_pancreatic')}</td><td>${teSel('q3_te_3')}</td></tr>
+</table>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 2</span>
+  <p>${t('q3_t2_desc')}</p>
+</div>
+<table>
+  <tr><th>${t('s_patient')}</th><th>${t('q3_gene')}</th><th>${t('s_effect')}</th><th>${t('s_dist_tss')}</th></tr>
+  <tr><td>Patient 1 — ${t('q3_lung')}</td><td>MET oncogene</td><td>${effectSel('q3_effect_1')}</td><td><input type="number" placeholder="bp" onchange="saveAns('q3_tss_1',this.value)" style="width:90px;"></td></tr>
+  <tr><td>Patient 2 — ${t('q3_breast')}</td><td>LIN28B oncogene</td><td>${effectSel('q3_effect_2')}</td><td><input type="number" placeholder="bp" onchange="saveAns('q3_tss_2',this.value)" style="width:90px;"></td></tr>
+  <tr><td>Patient 3 — ${t('q3_pancreatic')}</td><td>${t('q3_tumour_sup')}</td><td>${effectSel('q3_effect_3')}</td><td><input type="number" placeholder="bp" onchange="saveAns('q3_tss_3',this.value)" style="width:90px;"></td></tr>
+</table>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 3</span>
+  <p>${t('q3_t3_desc')}</p>
+</div>
+<div class="formula-box">
+  \\[ V = \\frac{1}{TSS_{dist}} \\times Promoter\\_Activity \\times Cancer\\_Specificity \\]
+  <div style="font-size:0.78rem;color:var(--text2);margin-top:6px;">${t('q3_formula_note')}</div>
+</div>
+<table>
+  <tr><th>${t('s_cancer')}</th><th>${t('s_vscore')}</th><th>${t('s_rank')}</th></tr>
+  <tr><td>${t('q3_lung')}</td><td><input type="text" onchange="saveAns('q3_v_lung',this.value)"></td><td><input type="text" onchange="saveAns('q3_rank_lung',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>${t('q3_breast')}</td><td><input type="text" onchange="saveAns('q3_v_breast',this.value)"></td><td><input type="text" onchange="saveAns('q3_rank_breast',this.value)" style="width:60px;text-align:center;"></td></tr>
+  <tr><td>${t('q3_pancreatic')}</td><td><input type="text" onchange="saveAns('q3_v_pancreatic',this.value)"></td><td><input type="text" onchange="saveAns('q3_rank_pancreatic',this.value)" style="width:60px;text-align:center;"></td></tr>
+</table>
+
+<hr class="section-divider">
+<h3>${t('q3_seq_header')}</h3>
+<div class="dataset-box"><span class="seq-header">>Patient_1_Lung</span>
+ATGGATCCAGCTGCAGCTGGAGCGGCGGCGGCGGCCCGTCCAGCTCCAGCTCCAGCTCCAGCGCAGCAGCGGCGGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGTGA
+
+<span class="seq-header">>Patient_2_Breast</span>
+ATGGATCCAGCTGCAGCTGGAGCGGCGGCGGCGGCCCGTCCAGCTCCAGCTCCAGCTCCAGCGCAGCAGCGGCGGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGTGA
+
+<span class="seq-header">>Patient_3_Pancreatic</span>
+ATGGATCCAGCTGCAGCTGGAGCGGCGGCGGCGGCCCGTCCAGCTCCAGCTCCAGCTCCAGCGCAGCAGCGGCGGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGTGA</div>`;
+
+    else if (num === 4) content.innerHTML = `
+<h2>${t('q4_title')}</h2>
+<div class="info-box">${t('q4_intro')}</div>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 1</span>
+  <p>${t('q4_t1_desc')}</p>
+</div>
+<div class="warning-box">📝 ${t('s_draw_pedigree')}</div>
+<div class="info-box" style="font-size:0.82rem;">
+  <strong>${t('q4_fam_struct')}</strong><br>
+  ${t('q4_gen1')}<br>
+  ${t('q4_gen2')}<br>
+  ${t('q4_gen3')}<br><br>
+  <em>${t('q4_legend')}</em>
+</div>
+
+<p style="margin-top:14px;">${t('s_carriers')}</p>
+<input class="answer-input" type="text" placeholder="e.g. I-2, II-1, II-4..." onchange="saveAns('q4_carriers',this.value)">
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 2</span>
+  <p>${t('q4_t2_desc')}</p>
+</div>
+<label class="mc-option"><input type="radio" name="q4inh" onchange="saveAns('q4_inheritance','AD')"> ${t('s_ad')}</label>
+<label class="mc-option"><input type="radio" name="q4inh" onchange="saveAns('q4_inheritance','AR')"> ${t('s_ar')}</label>
+<label class="mc-option"><input type="radio" name="q4inh" onchange="saveAns('q4_inheritance','XD')"> ${t('s_xd')}</label>
+<label class="mc-option"><input type="radio" name="q4inh" onchange="saveAns('q4_inheritance','XR')"> ${t('s_xr')}</label>
+<label class="mc-option"><input type="radio" name="q4inh" onchange="saveAns('q4_inheritance','MT')"> ${t('s_mt')}</label>
+
+<div class="task-header">
+  <span class="task-num">${t('s_task')} 3</span>
+  <p>${t('q4_t3_desc')}</p>
+</div>
+<div class="formula-box">
+  \\[ Penetrance = \\frac{Affected\\ carriers}{Total\\ carriers} \\times 100\\% \\]
+</div>
+<table>
+  <tr><th>${t('s_param')}</th><th>${t('s_answer')}</th></tr>
+  <tr><td>${t('q4_penetrance_row')}</td><td><input type="text" placeholder="${t('s_penetrance_ph')}" onchange="saveAns('q4_penetrance',this.value)"></td></tr>
+</table>
+
+<hr class="section-divider">
+<h3>${t('q4_seq_header')}</h3>
+<div class="dataset-box"><span class="seq-header">>I-1_Male (Reference / Wild-type)</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>I-2_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>II-1_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>II-2_Male</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>II-3_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>II-4_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>III-1_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>III-2_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTACTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>III-3_Male</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG
+
+<span class="seq-header">>III-4_Female</span>
+ATGAAAGGTTTTGGAGTCTGCTGACCTGCTTCCAGGAGCTGATGCTGCTG</div>`;
+
+    content.scrollTo(0, 0);
+    if (window.MathJax) MathJax.typesetPromise();
+}
+
+
+/* ════════════════════════════════════════════════
+   BIO-WORKBENCH TOOLS
+════════════════════════════════════════════════ */
+function runTranscription() {
+    // Colour palette for distinct ORFs
+    const ORF_COLORS = [
+        { bg:'#1a56a0', light:'#dbeafe' }, // blue
+        { bg:'#1a7a3c', light:'#dcfce7' }, // green
+        { bg:'#7c3aed', light:'#ede9fe' }, // purple
+        { bg:'#b45309', light:'#fef3c7' }, // amber
+        { bg:'#be185d', light:'#fce7f3' }, // pink
+        { bg:'#0e7490', light:'#cffafe' }, // cyan
+    ];
+    const STOPS = new Set(['UAA','UAG','UGA']);
+
+    // Find all ORFs in a RNA string.
+    // Returns array of ORF objects: { start, end, color_idx }
+    // where start/end are character indices (inclusive start codon, inclusive stop codon last char)
+    // Multiple AUGs in the same reading frame before a stop all belong to the same ORF group.
+    function findORFs(rna) {
+        const len = rna.length;
+        // For each position that is AUG, follow triplets to find stop
+        // Deduplicate: if two AUGs share the same stop, they are "nested" — we mark all as same ORF group
+        // Strategy: scan left-to-right; for each AUG not already inside a marked ORF, trace to stop
+        const covered = new Uint8Array(len); // 0=none, orfIndex+1=orf
+        const orfs = [];
+
+        for (let i = 0; i <= len - 3; i++) {
+            const codon = rna.slice(i, i+3);
+            if (codon !== 'AUG') continue;
+            if (covered[i]) continue; // already inside an ORF — still mark as start but same group
+
+            // Walk in-frame triplets from this AUG
+            let stopFound = false;
+            for (let j = i; j <= len - 3; j += 3) {
+                const c = rna.slice(j, j+3);
+                if (STOPS.has(c)) {
+                    // ORF: i..j+2
+                    const colorIdx = orfs.length % ORF_COLORS.length;
+                    orfs.push({ start: i, end: j+2, colorIdx });
+                    // Mark all positions in this ORF as covered
+                    for (let k = i; k <= j+2; k++) covered[k] = orfs.length; // 1-based
+                    stopFound = true;
+                    break;
+                }
+            }
+            // If no stop found, mark as open ORF (no stop codon)
+            if (!stopFound) {
+                const colorIdx = orfs.length % ORF_COLORS.length;
+                orfs.push({ start: i, end: len-1, colorIdx, open: true });
+                for (let k = i; k < len; k++) covered[k] = orfs.length;
+            }
+        }
+        return { orfs, covered };
+    }
+
+    // Build HTML for a single RNA sequence with ORF highlighting
+    function renderRNA(rna) {
+        if (!rna) return `<span style="color:#8c959f">${t('out_empty')}</span>`;
+        const { orfs, covered } = findORFs(rna);
+
+        if (orfs.length === 0) {
+            // No ORFs found — show plain sequence with any stop codons dimly marked
+            let html = '';
+            for (let i = 0; i < rna.length; i++) html += escH(rna[i]);
+            return html + `\n<span style="color:#8c959f;font-size:0.7rem;">${t('out_no_orf')}</span>`;
+        }
+
+        // Build a character-level array of orf index (-1 = not in orf)
+        // Then render run-length encoded spans
+        let html = '';
+        let i = 0;
+        while (i < rna.length) {
+            const orfId = covered[i] - 1; // -1 if not covered
+            if (orfId < 0) {
+                // non-ORF region
+                let end = i;
+                while (end < rna.length && covered[end] === 0) end++;
+                html += `<span style="color:#a8e6c4">${escH(rna.slice(i, end))}</span>`;
+                i = end;
+            } else {
+                const orf = orfs[orfId];
+                const col = ORF_COLORS[orf.colorIdx];
+                // Render codon by codon within this ORF for triplet grouping
+                let orfHtml = '';
+                const orfStart = orf.start;
+                const orfEnd   = orf.end;
+
+                // Pre-orf gap within same covered block shouldn't happen, but safe:
+                let j = i;
+                while (j <= orfEnd && j < rna.length) {
+                    const tripletPos = j - orfStart; // position within ORF
+                    const codon = rna.slice(j, j+3);
+                    if (codon.length < 3) { orfHtml += escH(rna.slice(j)); j = rna.length; break; }
+
+                    if (j === orfStart) {
+                        // Start codon AUG
+                        orfHtml += `<mark style="background:${col.bg};color:#fff;font-weight:900;padding:1px 3px;border-radius:3px 0 0 3px;font-family:'JetBrains Mono',monospace;" title="Start codon (ORF ${orfId+1})">▶AUG</mark>`;
+                    } else if (STOPS.has(codon) && j + 2 === orfEnd) {
+                        // Stop codon
+                        orfHtml += `<mark style="background:#c0392b;color:#fff;font-weight:900;padding:1px 3px;border-radius:0 3px 3px 0;font-family:'JetBrains Mono',monospace;" title="Stop codon (ORF ${orfId+1})">■${escH(codon)}</mark>`;
+                    } else if (codon === 'AUG') {
+                        // Nested AUG inside same ORF
+                        orfHtml += `<mark style="background:${col.bg};color:#fff;font-weight:700;padding:1px 2px;border-radius:2px;font-family:'JetBrains Mono',monospace;opacity:0.85;" title="Internal AUG (ORF ${orfId+1})">▶AUG</mark>`;
+                    } else {
+                        // Regular coding codon — colored background
+                        orfHtml += `<span style="background:${col.light};color:#1c2333;border-radius:1px;" title="ORF ${orfId+1}">${escH(codon)}</span>`;
+                    }
+                    j += 3;
+                }
+                // If open ORF (no stop), mark end
+                if (orf.open) {
+                    orfHtml += `<span style="color:${col.bg};font-weight:700;" title="No stop codon found"> ···</span>`;
+                }
+                html += orfHtml;
+                i = orfEnd + 1;
+            }
+        }
+
+        // Legend
+        let legend = '\n\n';
+        orfs.forEach((orf, idx) => {
+            const col = ORF_COLORS[orf.colorIdx];
+            const len = orf.end - orf.start + 1;
+            const codons = Math.floor(len / 3);
+            const status = orf.open ? t('out_orf_open') : t('out_orf_complete');
+            legend += `<span style="display:inline-block;background:${col.bg};color:#fff;padding:1px 7px;border-radius:3px;font-size:0.7rem;font-weight:700;margin-right:6px;">ORF ${idx+1}</span>`;
+            legend += `<span style="color:#a8e6c4;font-size:0.75rem;">${t('out_orf_pos')} ${orf.start+1}–${orf.end+1} · ${codons} ${t('out_orf_codons')} · ${status}</span>\n`;
+        });
+
+        return html + legend;
+    }
+
+    function escH(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    // ── Main ──
+    const input = document.getElementById('seq-input').value.trim();
+    const out = document.getElementById('result-display');
+    out.innerHTML = '';
+    out.setAttribute('data-pristine','false');
+
+    const lines = input.split('\n');
+    let html = `<span style="color:#7eb3f5;font-weight:700;">${t('out_transcription')}</span>\n\n`;
+
+    // Parse FASTA blocks
+    const blocks = [];
+    let curHeader = '', curSeq = '';
+    for (const line of lines) {
+        if (line.startsWith('>')) {
+            if (curSeq) blocks.push({ header: curHeader, seq: curSeq });
+            curHeader = line; curSeq = '';
+        } else {
+            curSeq += line.replace(/\s/g,'');
+        }
+    }
+    if (curSeq) blocks.push({ header: curHeader || 'Sequence', seq: curSeq });
+
+    if (blocks.length === 0) {
+        out.innerHTML = `<span style="color:#8c959f;">${t('out_no_input')}</span>`;
+        return;
+    }
+
+    for (const block of blocks) {
+        const rna = block.seq.toUpperCase().replace(/T/g,'U').replace(/[^AUGC]/g,'');
+        html += `<span style="color:#7eb3f5;font-weight:700;">${escH(block.header)}</span>\n`;
+        html += `<span style="color:#8c959f;font-size:0.7rem;">${rna.length} nt</span>\n`;
+        html += renderRNA(rna);
+        html += '\n\n';
+    }
+
+    out.innerHTML = html;
+}
+
+function runTranslation() {
+    document.getElementById('result-display').innerHTML = '';
+    document.getElementById('result-display').setAttribute('data-pristine','false');
+    const CODON = {"GCU":"A","GCC":"A","GCA":"A","GCG":"A","UGU":"C","UGC":"C","DAU":"D","GAU":"D","GAC":"D","GAA":"E","GAG":"E","UUU":"F","UUC":"F","GGU":"G","GGC":"G","GGA":"G","GGG":"G","CAU":"H","CAC":"H","AUU":"I","AUC":"I","AUA":"I","AAA":"K","AAG":"K","UUA":"L","UUG":"L","CUU":"L","CUC":"L","CUA":"L","CUG":"L","AUG":"M","AAU":"N","AAC":"N","CCU":"P","CCC":"P","CCA":"P","CCG":"P","CAA":"Q","CAG":"Q","CGU":"R","CGC":"R","CGA":"R","CGG":"R","AGA":"R","AGG":"R","UCU":"S","UCC":"S","UCA":"S","UCG":"S","AGU":"S","AGC":"S","ACU":"T","ACC":"T","ACA":"T","ACG":"T","GUU":"V","GUC":"V","GUA":"V","GUG":"V","UGG":"W","UAU":"Y","UAC":"Y","UAA":"*","UAG":"*","UGA":"*"};
+    const input = document.getElementById('seq-input').value.trim();
+    const blocks = input.split('>').filter(x => x.trim());
+    let result = t('out_translation') + '\n\n';
+    if (blocks.length === 0) {
+        const seq = input.toUpperCase().replace(/T/g,'U').replace(/[^AUGC]/g,'');
+        let prot = '';
+        for(let i=0; i<seq.length-2; i+=3) prot += (CODON[seq.substr(i,3)] || '?');
+        result += t('out_direct') + '\n' + prot;
+    } else {
+        for (const block of blocks) {
+            const lines = block.split('\n');
+            const header = lines[0].trim();
+            const seq = lines.slice(1).join('').replace(/\s/g,'').toUpperCase().replace(/T/g,'U').replace(/[^AUGC]/g,'');
+            let prot = ''; let started = false;
+            for(let i=0; i<seq.length-2; i+=3) {
+                const aa = CODON[seq.substr(i,3)] || '?';
+                if(aa === 'M') started = true;
+                if(started) { if(aa === '*') { prot += '*'; break; } prot += aa; }
+            }
+            result += '>' + header + '\n' + (prot || t('out_no_start')) + '\n\n';
+        }
+    }
+    document.getElementById('result-display').innerText = result;
+}
+
+function runSimpleAlignment() {
+    document.getElementById('result-display').innerHTML = '';
+    document.getElementById('result-display').setAttribute('data-pristine','false');
+    const input = document.getElementById('seq-input').value.trim();
+    const blocks = input.split('>').filter(x => x.trim());
+    if (blocks.length < 2) { alert(t('out_no_seqs')); return; }
+    const names = blocks.map(b => b.split('\n')[0].trim());
+    const seqs = blocks.map(b => b.split('\n').slice(1).join('').replace(/\s/g,'').toUpperCase());
+    const ref = seqs[0];
+    let result = `${t('out_align')} ${names[0]} ===\n\n`;
+
+    for (let i = 1; i < seqs.length; i++) {
+        const s = seqs[i];
+        const L = Math.max(ref.length, s.length);
+        let matches = 0, mismatches = 0;
+        let refLine = '', matchLine = '', qLine = '';
+
+        for (let j = 0; j < L; j++) {
+            const r = ref[j] || '-';
+            const q = s[j]   || '-';
+            if (r === q) { matches++; matchLine += '|'; }
+            else         { mismatches++; matchLine += 'X'; }
+            refLine += r;
+            qLine   += q;
+        }
+
+        const pct = ((matches / L) * 100).toFixed(2);
+        result += `${names[i]}\n`;
+        result += `Identity: ${pct}%  |  ${t('out_matches')}: ${matches}  |  ${t('out_mismatches')}: ${mismatches}\n\n`;
+
+        const CHUNK = 60;
+        for (let j = 0; j < L; j += CHUNK) {
+            const pos = j + 1;
+            result += `Ref  [${String(pos).padStart(4)}]  ${refLine.slice(j, j+CHUNK)}\n`;
+            result += `              ${matchLine.slice(j, j+CHUNK)}\n`;
+            result += `Qry  [${String(pos).padStart(4)}]  ${qLine.slice(j, j+CHUNK)}\n\n`;
+        }
+        result += '─'.repeat(70) + '\n\n';
+    }
+    document.getElementById('result-display').innerText = result;
+}
+
+function runPhyloTree() {
+    document.getElementById('result-display').innerHTML = '';
+    document.getElementById('result-display').setAttribute('data-pristine','false');
+    const input = document.getElementById('seq-input').value.trim();
+    const blocks = input.split('>').filter(x => x.trim());
+    if (blocks.length < 2) { alert(t('out_no_seqs_tree')); return; }
+    const names = blocks.map(b => b.split('\n')[0].trim().substring(0,12));
+    const seqs = blocks.map(b => b.split('\n').slice(1).join('').replace(/\s/g,'').toUpperCase());
+    let result = t('out_distance') + '\n\n';
+    const colW = 13;
+    result += ' '.repeat(colW) + names.map(n => n.padEnd(colW)).join('') + '\n';
+    for (let i = 0; i < seqs.length; i++) {
+        result += names[i].padEnd(colW);
+        for (let j = 0; j < seqs.length; j++) {
+            const L = Math.min(seqs[i].length, seqs[j].length);
+            let d = 0;
+            for (let k = 0; k < L; k++) if (seqs[i][k] !== seqs[j][k]) d++;
+            result += d.toString().padEnd(colW);
+        }
+        result += '\n';
+    }
+    result += '\n' + t('out_distance_note');
+    document.getElementById('result-display').innerText = result;
+}
+
+/* ════════════════════════════════════════════════
+   PROTEIN DOMAIN REFERENCE DATABASE
+   ── Edit domain entries below ──
+   Each entry: { name, description, sequence }
+   sequence = canonical protein sequence for that domain (single-letter AA)
+════════════════════════════════════════════════ */
+const DOMAIN_DB = [
+    {
+        name: "Viral Serine Protease",
+        description: "Catalytic domain responsible for cleaving viral polyproteins. Drug target in Laplandia outbreak.",
+        sequence: "MAYDYDDDDVDLIDVDDYDVDDLIDVDDYDDVDDYDIDVDD"
+    },
+    {
+        name: "RuBisCO Large Subunit",
+        description: "Ribulose-1,5-bisphosphate carboxylase/oxygenase — primary CO₂ fixation enzyme in C3 photosynthesis.",
+        sequence: "MRLRSSISAAAGLPKAKSTGIVSGKLRSAAPNKVEYDYVVPADDED"
+    },
+    {
+        name: "PEP Carboxylase",
+        description: "Phosphoenolpyruvate carboxylase — initial carbon fixation step in C4 photosynthesis.",
+        sequence: "MRLRSSISAAAGLPKAKSTGIVSGKLRSAAPNKVEYDYVVPADDEF"
+    },
+    // ── ADD MORE DOMAINS BELOW ──
+    // { name: "My Domain", description: "Description here.", sequence: "AMINOACIDSEQUENCE" },
+];
+
+function runDomainAnalysis() {
+    document.getElementById('result-display').innerHTML = '';
+    document.getElementById('result-display').setAttribute('data-pristine','false');
+    const input = document.getElementById('seq-input').value.trim();
+    if (!input) { document.getElementById('result-display').innerText = t('out_paste_protein'); return; }
+
+    const out = document.getElementById('result-display');
+
+    const blocks = [];
+    if (input.includes('>')) {
+        const parts = input.split('>').filter(x => x.trim());
+        for (const p of parts) {
+            const lines = p.split('\n');
+            blocks.push({ header: lines[0].trim(), seq: lines.slice(1).join('').replace(/\s|\*/g,'').toUpperCase() });
+        }
+    } else {
+        blocks.push({ header: 'Query sequence', seq: input.replace(/\s|\*/g,'').toUpperCase() });
+    }
+
+    function escH(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    function alignPair(query, ref) {
+        const len = Math.max(query.length, ref.length);
+        const matches = [], mismatches = [];
+        for (let i = 0; i < len; i++) {
+            const q = query[i] || '-';
+            const r = ref[i]   || '-';
+            if (q === r) matches.push(i);
+            else mismatches.push({ pos: i+1, query: q, ref: r });
+        }
+        const identity = (matches.length / len) * 100;
+        return { identity, mismatches, len };
+    }
+
+    let html = `<span style="color:#7eb3f5;font-weight:700;">${t('out_domain')}</span>\n\n`;
+
+    for (const block of blocks) {
+        html += `<span style="color:#7eb3f5;font-weight:700;">${escH(block.header)}</span>\n`;
+        html += `<span style="color:#8c959f;font-size:0.7rem;">${block.seq.length} aa</span>\n\n`;
+
+        if (!block.seq) { html += `<span style="color:#c0392b;">${t('out_empty_seq')}</span>\n\n`; continue; }
+
+        let bestMatch = null;
+
+        for (const domain of DOMAIN_DB) {
+            const { identity, mismatches, len } = alignPair(block.seq, domain.sequence);
+            if (identity === 100) {
+                html += `<span style="background:#dcfce7;color:#1a7a3c;font-weight:800;padding:2px 8px;border-radius:4px;">✔ ${t('out_domain_found')}</span>\n`;
+                html += `<span style="color:#1a7a3c;font-weight:700;font-size:0.9rem;">${escH(domain.name)}</span>\n`;
+                html += `<span style="color:#57606a;font-size:0.78rem;">${escH(domain.description)}</span>\n`;
+                html += `<span style="color:#1a7a3c;font-size:0.78rem;">${t('out_domain_perfect')}</span>\n\n`;
+                bestMatch = { identity: 100, domain };
+                break;
+            }
+            if (identity > (bestMatch ? bestMatch.identity : 0)) {
+                bestMatch = { identity, mismatches, domain };
+            }
+        }
+
+        if (!bestMatch) {
+            html += `<span style="color:#c0392b;font-weight:700;">${t('out_no_domain')}</span>\n\n`;
+            continue;
+        }
+
+        if (bestMatch.identity < 100) {
+            const pct = bestMatch.identity.toFixed(1);
+            const col = bestMatch.identity >= 80 ? '#b45309' : '#c0392b';
+            const bgCol = bestMatch.identity >= 80 ? '#fef3c7' : '#fdf0ef';
+            const icon = bestMatch.identity >= 80 ? '⚠' : '✘';
+
+            html += `<span style="background:${bgCol};color:${col};font-weight:800;padding:2px 8px;border-radius:4px;">${icon} ${t('out_domain_prob')}</span>\n`;
+            html += `<span style="color:${col};font-weight:700;font-size:0.9rem;">${escH(bestMatch.domain.name)}</span>\n`;
+            html += `<span style="color:#57606a;font-size:0.78rem;">${escH(bestMatch.domain.description)}</span>\n`;
+            html += `<span style="color:${col};font-size:0.8rem;font-weight:700;">${t('out_confidence')}: ${pct}% ${t('out_similarity')}</span>\n\n`;
+
+            if (bestMatch.mismatches && bestMatch.mismatches.length > 0) {
+                html += `<span style="color:#57606a;font-size:0.75rem;font-weight:700;">${t('out_mismatches_lbl')} (${bestMatch.mismatches.length}):</span>\n`;
+                for (const mm of bestMatch.mismatches) {
+                    const effect = mm.query === '-' ? 'deletion' : mm.ref === '-' ? 'insertion' : 'substitution';
+                    html += `  <span style="color:#c0392b;font-family:'JetBrains Mono',monospace;font-size:0.75rem;">${t('out_orf_pos')} ${String(mm.pos).padStart(3)}:</span>`;
+                    html += ` <span style="background:#fdf0ef;color:#c0392b;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:0.78rem;">${escH(mm.ref)}→${escH(mm.query)}</span>`;
+                    html += ` <span style="color:#8c959f;font-size:0.72rem;">(${effect})</span>\n`;
+                }
+            }
+            html += '\n';
+        }
+    }
+
+    if (DOMAIN_DB.length === 0) html += `<span style="color:#c0392b;">${t('out_no_domain_db')}</span>\n`;
+    out.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════
+   EXAM CONTROL
+════════════════════════════════════════════════ */
+function startExam() {
+    const name = document.getElementById('student-name').value.trim();
+    const region = document.getElementById('student-region').value;
+    const school = document.getElementById('student-school').value.trim();
+    if (!name)   { alert(t('alert_name'));   return; }
+    if (!region) { alert(t('alert_region')); return; }
+    if (!school) { alert(t('alert_school')); return; }
+
+    examData = { name, region, school, startTime: new Date().toISOString() };
+
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('exam-interface').classList.remove('hidden');
+    document.getElementById('display-name').textContent = name;
+    document.getElementById('display-region').textContent = region;
+
+    showScenario(1);
+    startTimer();
+}
+
+function startTimer() {
+    let time = EXAM_MINS * 60;
+    const display = document.getElementById('timer-display');
+    timerInterval = setInterval(() => {
+        const m = Math.floor(time / 60), s = time % 60;
+        display.textContent = `${m}:${s < 10 ? '0'+s : s}`;
+        display.className = time > 1800 ? 'ok' : time > 600 ? '' : 'warn';
+        if (time <= 0) { clearInterval(timerInterval); finalSubmit(true); }
+        time--;
+    }, 1000);
+}
+
+function downloadAnswers() {
+    examData.downloadTime = new Date().toISOString();
+    const blob = new Blob([JSON.stringify(examData, null, 2)], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `NBO2026_Backup_${examData.name || 'student'}_${Date.now()}.json`;
+    a.click();
+}
+
+async function finalSubmit(auto = false) {
+    if (!auto && !confirm(t('confirm_submit'))) return;
+    clearInterval(timerInterval);
+    examData.submitTime = new Date().toISOString();
+
+    try { downloadAnswers(); } catch(e) { console.warn('Backup download failed:', e); }
+
+    const iface = document.getElementById('exam-interface');
+    iface.innerHTML = `
+        <div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#f7f8fa;">
+            <div style="text-align:center;padding:60px;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.1);max-width:480px;">
+                <div style="font-size:3rem;margin-bottom:20px;">✅</div>
+                <h2 style="color:#1a7a3c;font-size:1.5rem;font-weight:800;margin-bottom:10px;">${t('submit_title')}</h2>
+                <p style="color:#57606a;font-size:0.92rem;margin-bottom:8px;">${t('submit_msg')}</p>
+                <p style="color:#57606a;font-size:0.85rem;">${t('submit_thanks')} <strong style="color:#1c2333;">${examData.name || ''}</strong>.</p>
+            </div>
+        </div>`;
+
+    // Try to send to Google Sheets in background
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(examData) });
+    } catch(e) {
+        console.warn('Server submission failed (backup already saved):', e);
+    }
+}
+
+/* ════════════════════════════════════════════════
+   EDIT PROFILE
+════════════════════════════════════════════════ */
+function openEditProfile() {
+    document.getElementById('edit-name').value = examData.name || '';
+    document.getElementById('edit-school').value = examData.school || '';
+
+    const sel = document.getElementById('edit-region');
+    if (sel.options.length <= 1) {
+        regions.forEach(r => {
+            const o = document.createElement('option');
+            o.value = o.textContent = r;
+            sel.appendChild(o);
+        });
+    }
+    sel.value = examData.region || '';
+
+    const modal = document.getElementById('edit-modal');
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+}
+
+function closeEditProfile() {
+    const modal = document.getElementById('edit-modal');
+    modal.style.display = 'none';
+    modal.classList.add('hidden');
+}
+
+function saveEditProfile() {
+    const name   = document.getElementById('edit-name').value.trim();
+    const region = document.getElementById('edit-region').value;
+    const school = document.getElementById('edit-school').value.trim();
+    if (!name)   { alert(t('alert_name'));   return; }
+    if (!region) { alert(t('alert_region')); return; }
+    if (!school) { alert(t('alert_school')); return; }
+
+    examData.name   = name;
+    examData.region = region;
+    examData.school = school;
+
+    document.getElementById('display-name').textContent   = name;
+    document.getElementById('display-region').textContent = region;
+
+    closeEditProfile();
+}
+
+
+window.onload = () => {
+    const sel = document.getElementById('student-region');
+    regions.forEach(r => {
+        const o = document.createElement('option');
+        o.value = o.textContent = r;
+        sel.appendChild(o);
+    });
+    // Mark result display as pristine so lang switch can update its placeholder
+    document.getElementById('result-display').setAttribute('data-pristine','true');
+    // Apply default language (English)
+    setLang('en');
+};
+</script>
+</body>
+</html>
